@@ -6,3 +6,6 @@ migrations/
 .vscode/
 .idea/
 node_modules/
+static/
+uploads/helpers/
+uploads/asset-manifest.json
