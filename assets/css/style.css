@@ -54,7 +54,7 @@ body {
 }
 .intro-overlay.intro--done {
   pointer-events: none;
-  animation: introFadeOut 0.35s ease forwards;
+  animation: introFadeOut 0.2s ease forwards;
 }
 .intro-overlay__logo {
   width: min(540px, 70vw);
@@ -63,7 +63,7 @@ body {
   opacity: 0;
   transform: scale(0.92) translateZ(0);
   will-change: transform, opacity;
-  animation: introLogoIn 1.4s cubic-bezier(0.22, 0.61, 0.36, 1) forwards;
+  animation: introLogoIn 0.75s cubic-bezier(0.22, 0.61, 0.36, 1) forwards;
 }
 .intro--done .intro-overlay__logo {
   animation: none;
@@ -85,9 +85,7 @@ body {
 body.intro-active {
   overflow: hidden !important;
 }
-body.intro-active > *:not(.intro-overlay) {
-  visibility: hidden;
-}
+
 
 /* Performance: seções grandes fora da dobra só renderizam quando visíveis */
 .brand-statement,
@@ -232,7 +230,7 @@ input, textarea, select { font-family: var(--font-sans); }
   z-index: 10;
 }
 .nav__logo-img {
-  height: clamp(64px, 26.25vh, 180px);
+  height: clamp(128px, 52.5vh, 360px);
   width: auto;
   display: block;
   max-width: 100%;
@@ -333,20 +331,20 @@ input, textarea, select { font-family: var(--font-sans); }
 
 @media (max-width: 900px) {
   .nav__links { display: none; }
-  .nav__logo-img { height: clamp(84px, 21vh, 165px); }
+  .nav__hamburger { display: block; }
+  .nav { padding: 0 20px; }
+  .nav__logo-img { height: clamp(168px, 42vh, 330px); }
 }
 @media (max-width: 600px) {
-  .nav__logo-img { height: clamp(72px, 18vh, 126px); }
+  .nav__logo-img { height: clamp(144px, 36vh, 252px); }
 }
 @media (prefers-reduced-motion: reduce) {
-  .intro-overlay__logo { animation-duration: 1.2s !important; }
+  .intro-overlay__logo { animation-duration: 0.5s !important; }
   *, *::before, *::after {
     animation-duration: 0.01ms !important;
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
   }
-  .nav__hamburger { display: block; }
-  .nav { padding: 0 20px; }
 }
 
 /* ===== HERO SECTION (full-screen, dark) ===== */
