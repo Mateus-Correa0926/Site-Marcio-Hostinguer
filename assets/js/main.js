@@ -26,15 +26,35 @@
     hamburger.setAttribute('aria-expanded', 'false');
     hamburger.setAttribute('aria-controls', 'mobileMenu');
 
+    // Inject close button (arrow) inside the menu if not present
+    if (!mobileMenu.querySelector('.nav__mobile-close')) {
+      var closeBtn = document.createElement('button');
+      closeBtn.className = 'nav__mobile-close';
+      closeBtn.setAttribute('aria-label', 'Fechar menu');
+      closeBtn.innerHTML = '<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 6 9 12 15 18"></polyline></svg>';
+      mobileMenu.insertBefore(closeBtn, mobileMenu.firstChild);
+    }
+
+    // Inject backdrop if not present
+    var backdrop = document.getElementById('mobileMenuBackdrop');
+    if (!backdrop) {
+      backdrop = document.createElement('div');
+      backdrop.id = 'mobileMenuBackdrop';
+      backdrop.className = 'nav__backdrop';
+      document.body.appendChild(backdrop);
+    }
+
     function openMenu() {
       hamburger.classList.add('active');
       mobileMenu.classList.add('active');
+      backdrop.classList.add('active');
       document.body.classList.add('no-scroll');
       hamburger.setAttribute('aria-expanded', 'true');
     }
     function closeMenu() {
       hamburger.classList.remove('active');
       mobileMenu.classList.remove('active');
+      backdrop.classList.remove('active');
       document.body.classList.remove('no-scroll');
       hamburger.setAttribute('aria-expanded', 'false');
     }
@@ -44,6 +64,13 @@
     }
 
     hamburger.addEventListener('click', toggleMenu);
+
+    // Close on close-button click
+    var closeBtnEl = mobileMenu.querySelector('.nav__mobile-close');
+    if (closeBtnEl) closeBtnEl.addEventListener('click', closeMenu);
+
+    // Close on backdrop (outside) click
+    backdrop.addEventListener('click', closeMenu);
 
     // Close on link click
     var mobileLinks = mobileMenu.querySelectorAll('.nav__mobile-link');
