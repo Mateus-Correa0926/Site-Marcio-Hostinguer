@@ -311,22 +311,23 @@ input, textarea, select { font-family: var(--font-sans); }
   position: fixed;
   top: 0; right: 0; bottom: 0;
   left: auto;
-  width: 50%;
+  width: 50vw;
   max-width: 420px;
-  min-width: 260px;
+  min-width: 220px;
   background: var(--black);
   z-index: 1200;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 32px;
+  gap: 28px;
   padding: 24px;
   transform: translateX(100%);
   transition: transform 0.35s cubic-bezier(0.22, 0.61, 0.36, 1);
   box-shadow: -12px 0 40px rgba(0,0,0,0.4);
+  visibility: hidden;
 }
-.nav__mobile.active { transform: translateX(0); }
+.nav__mobile.active { transform: translateX(0); visibility: visible; }
 
 /* Backdrop */
 .nav__backdrop {
