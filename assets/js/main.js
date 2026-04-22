@@ -23,20 +23,64 @@
   const hamburger = document.getElementById('hamburger');
   const mobileMenu = document.getElementById('mobileMenu');
   if (hamburger && mobileMenu) {
-    hamburger.addEventListener('click', function () {
-      hamburger.classList.toggle('active');
-      mobileMenu.classList.toggle('active');
-      document.body.classList.toggle('no-scroll');
-    });
+    hamburger.setAttribute('aria-expanded', 'false');
+    hamburger.setAttribute('aria-controls', 'mobileMenu');
+
+    function openMenu() {
+      hamburger.classList.add('active');
+      mobileMenu.classList.add('active');
+      document.body.classList.add('no-scroll');
+      hamburger.setAttribute('aria-expanded', 'true');
+    }
+    function closeMenu() {
+      hamburger.classList.remove('active');
+      mobileMenu.classList.remove('active');
+      document.body.classList.remove('no-scroll');
+      hamburger.setAttribute('aria-expanded', 'false');
+    }
+    function toggleMenu() {
+      if (mobileMenu.classList.contains('active')) closeMenu();
+      else openMenu();
+    }
+
+    hamburger.addEventListener('click', toggleMenu);
+
     // Close on link click
     var mobileLinks = mobileMenu.querySelectorAll('.nav__mobile-link');
     for (var i = 0; i < mobileLinks.length; i++) {
-      mobileLinks[i].addEventListener('click', function () {
-        hamburger.classList.remove('active');
-        mobileMenu.classList.remove('active');
-        document.body.classList.remove('no-scroll');
-      });
+      mobileLinks[i].addEventListener('click', closeMenu);
     }
+
+    // Close on ESC
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape' && mobileMenu.classList.contains('active')) closeMenu();
+    });
+
+    // Close on resize to desktop
+    var mq = window.matchMedia('(min-width: 901px)');
+    var onMqChange = function () {
+      if (mq.matches) closeMenu();
+    };
+    if (mq.addEventListener) mq.addEventListener('change', onMqChange);
+    else if (mq.addListener) mq.addListener(onMqChange);
+  }
+
+  /* ---- Ensure videos play on mobile (iOS low-power, autoplay retries) ---- */
+  var bgVideos = document.querySelectorAll('video[autoplay]');
+  for (var v = 0; v < bgVideos.length; v++) {
+    (function (vid) {
+      vid.muted = true;
+      vid.playsInline = true;
+      var tryPlay = function () {
+        var p = vid.play();
+        if (p && typeof p.catch === 'function') p.catch(function () { /* ignore */ });
+      };
+      vid.addEventListener('canplay', tryPlay, { once: true });
+      vid.addEventListener('loadeddata', tryPlay, { once: true });
+      document.addEventListener('visibilitychange', function () {
+        if (!document.hidden) tryPlay();
+      });
+    })(bgVideos[v]);
   }
 
   /* ---- FAQ Accordion ---- */
