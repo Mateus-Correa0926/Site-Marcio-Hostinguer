@@ -5,6 +5,53 @@
 (function () {
   'use strict';
 
+  /* ---- Replace placeholder YouTube iframes (VIDEO_ID_*) with a graceful placeholder ---- */
+  (function () {
+    var iframes = document.querySelectorAll('iframe[src*="VIDEO_ID_"]');
+    for (var i = 0; i < iframes.length; i++) {
+      var ifr = iframes[i];
+      var wrap = ifr.parentElement; // .video-embed
+      if (!wrap) continue;
+      var placeholder = document.createElement('div');
+      placeholder.className = 'video-embed__placeholder';
+      placeholder.innerHTML = '<svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg><span>Vídeo em breve</span>';
+      wrap.replaceChild(placeholder, ifr);
+    }
+  })();
+
+  /* ---- Pause background videos when offscreen (perf) ---- */
+  if ('IntersectionObserver' in window) {
+    var bgVids = document.querySelectorAll('video[autoplay]');
+    if (bgVids.length) {
+      var vidObserver = new IntersectionObserver(function (entries) {
+        for (var i = 0; i < entries.length; i++) {
+          var vid = entries[i].target;
+          if (entries[i].isIntersecting) {
+            var p = vid.play();
+            if (p && typeof p.catch === 'function') p.catch(function () {});
+          } else {
+            try { vid.pause(); } catch (e) {}
+          }
+        }
+      }, { threshold: 0.05 });
+      for (var vi = 0; vi < bgVids.length; vi++) vidObserver.observe(bgVids[vi]);
+    }
+  }
+
+  /* ---- Safety: force-remove intro overlay after 3s in any edge case ---- */
+  setTimeout(function () {
+    document.body.classList.remove('intro-active');
+    var ov = document.getElementById('introOverlay');
+    if (ov && ov.parentNode) ov.parentNode.removeChild(ov);
+  }, 3000);
+
+  /* ---- Safety: reveal everything after 4s if IntersectionObserver somehow failed ---- */
+  setTimeout(function () {
+    var stillHidden = document.querySelectorAll('.reveal:not(.visible)');
+    for (var i = 0; i < stillHidden.length; i++) stillHidden[i].classList.add('visible');
+  }, 4000);
+
+
   /* ---- Navbar Scroll Effect ---- */
   const navbar = document.getElementById('navbar');
   if (navbar) {
