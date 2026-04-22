@@ -139,7 +139,7 @@
     else if (mq.addListener) mq.addListener(onMqChange);
   }
 
-  /* ---- Ensure videos play on mobile (iOS low-power, autoplay retries) + force loop ---- */
+  /* ---- Ensure videos play on mobile (iOS low-power, autoplay retries) + seamless loop ---- */
   var bgVideos = document.querySelectorAll('video[autoplay]');
   for (var v = 0; v < bgVideos.length; v++) {
     (function (vid) {
@@ -147,18 +147,17 @@
       vid.playsInline = true;
       vid.loop = true;
       vid.setAttribute('loop', '');
+      // Prefer full preload so the loop is seamless (no re-buffer at the end)
+      try { vid.preload = 'auto'; } catch (e) {}
+      vid.setAttribute('preload', 'auto');
+
       var tryPlay = function () {
         var p = vid.play();
         if (p && typeof p.catch === 'function') p.catch(function () { /* ignore */ });
       };
-      // Fallback loop: some browsers/devices ignore `loop` when preload="metadata"
+      // Only restart if the browser somehow ignored loop (safety net, no manual replay during normal loops)
       vid.addEventListener('ended', function () {
-        try { vid.currentTime = 0; } catch (e) {}
-        tryPlay();
-      });
-      // Extra safety: if near the end and paused, restart
-      vid.addEventListener('pause', function () {
-        if (vid.duration && vid.currentTime >= vid.duration - 0.3) {
+        if (!vid.loop) {
           try { vid.currentTime = 0; } catch (e) {}
           tryPlay();
         }
