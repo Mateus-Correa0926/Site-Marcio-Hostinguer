@@ -65,16 +65,30 @@
     else if (mq.addListener) mq.addListener(onMqChange);
   }
 
-  /* ---- Ensure videos play on mobile (iOS low-power, autoplay retries) ---- */
+  /* ---- Ensure videos play on mobile (iOS low-power, autoplay retries) + force loop ---- */
   var bgVideos = document.querySelectorAll('video[autoplay]');
   for (var v = 0; v < bgVideos.length; v++) {
     (function (vid) {
       vid.muted = true;
       vid.playsInline = true;
+      vid.loop = true;
+      vid.setAttribute('loop', '');
       var tryPlay = function () {
         var p = vid.play();
         if (p && typeof p.catch === 'function') p.catch(function () { /* ignore */ });
       };
+      // Fallback loop: some browsers/devices ignore `loop` when preload="metadata"
+      vid.addEventListener('ended', function () {
+        try { vid.currentTime = 0; } catch (e) {}
+        tryPlay();
+      });
+      // Extra safety: if near the end and paused, restart
+      vid.addEventListener('pause', function () {
+        if (vid.duration && vid.currentTime >= vid.duration - 0.3) {
+          try { vid.currentTime = 0; } catch (e) {}
+          tryPlay();
+        }
+      });
       vid.addEventListener('canplay', tryPlay, { once: true });
       vid.addEventListener('loadeddata', tryPlay, { once: true });
       document.addEventListener('visibilitychange', function () {
