@@ -1,0 +1,45 @@
+RewriteEngine On
+
+# Forçar index.html como página padrão (React)
+DirectoryIndex index.html
+
+# Permitir uploads grandes
+<IfModule mod_php.c>
+    php_value upload_max_filesize 512M
+    php_value post_max_size 512M
+    php_value max_execution_time 600
+    php_value max_input_time 600
+</IfModule>
+
+# Preflight CORS
+RewriteCond %{REQUEST_METHOD} OPTIONS
+RewriteRule ^(.*)$ index.php [QSA,L]
+
+# Rotas /api/ → index.php (backend PHP)
+RewriteCond %{REQUEST_URI} ^/api/
+RewriteRule ^api/(.*)$ index.php [QSA,L]
+
+# Admin SPA — qualquer rota /admin/* vai pro admin/index.html
+RewriteCond %{REQUEST_URI} ^/admin
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteRule ^admin(/.*)?$ admin/index.html [L]
+
+# Servir uploads direto
+RewriteRule ^uploads/(.*)$ uploads/$1 [L]
+
+# Arquivos e diretórios reais: servir direto
+RewriteCond %{REQUEST_FILENAME} -f
+RewriteRule ^ - [L]
+
+RewriteCond %{REQUEST_FILENAME} -d
+RewriteRule ^ - [L]
+
+# Tudo o resto → React (index.html)
+RewriteRule ^ index.html [L]
+
+# Proteger arquivos sensíveis
+<FilesMatch "^(database\.php|\.env|\.git)">
+    <IfModule mod_authz_core.c>
+        Require all denied
+    </IfModule>
+</FilesMatch>

@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="description" content="Filmes em Destaque — Stornoway Films. Assista aos destaques dos nossos filmes cinemáticos de casamento." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=Great+Vibes&family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <title>Filmes em Destaque — Stornoway Films</title>
+  <link rel="stylesheet" href="/assets/css/style.css" />
+</head>
+<body>
+
+  <!-- NAV -->
+  <nav class="nav nav--transparent" id="navbar">
+    <a href="/" class="nav__logo"><img src="/uploads/images/logo-transparente.png" alt="Stornoway Films" class="nav__logo-img" /></a>
+    <div class="nav__links">
+      <a href="/" class="nav__link">Início</a>
+      <a href="/about.html" class="nav__link">Sobre</a>
+      <a href="/experience.html" class="nav__link">Experiência</a>
+      <a href="/films.html" class="nav__link">Filmes</a>
+      <a href="/featured-films.html" class="nav__link nav__link--active">Destaques</a>
+      <a href="/contact.html" class="nav__link">Contato</a>
+      <a href="https://www.instagram.com/stornowayfilms/" target="_blank" rel="noopener" class="nav__social" aria-label="Instagram">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="5"/><circle cx="17.5" cy="6.5" r="1.5" fill="currentColor" stroke="none"/></svg>
+      </a>
+    </div>
+    <button class="nav__hamburger" id="hamburger" aria-label="Menu"><span></span><span></span><span></span></button>
+  </nav>
+  <div class="nav__mobile" id="mobileMenu">
+    <a href="/" class="nav__mobile-link">Início</a>
+    <a href="/about.html" class="nav__mobile-link">Sobre</a>
+    <a href="/experience.html" class="nav__mobile-link">Experiência</a>
+    <a href="/films.html" class="nav__mobile-link">Filmes</a>
+    <a href="/featured-films.html" class="nav__mobile-link">Destaques</a>
+    <a href="/contact.html" class="nav__mobile-link">Contato</a>
+  </div>
+
+  <!-- HERO -->
+  <section class="hero hero--medium">
+    <div class="hero__bg">
+      <video src="/uploads/videos/download%20(1).mp4" autoplay muted loop playsinline preload="metadata"></video>
+    </div>
+    <div class="hero__overlay"></div>
+    <div class="hero__content">
+      <p class="hero__page-title">Portfólio</p>
+      <h1 class="hero__page-heading">Filmes em Destaque</h1>
+    </div>
+  </section>
+
+  <!-- ====== FEATURED FILMS (CMS Dynamic) ====== -->
+  <div data-cms="featured-films">
+
+  <!-- ====== FILM 1: Mason & Jeff ====== -->
+  <section class="featured-film" id="featured-films-0">
+    <div class="featured-film__hero">
+      <div class="featured-film__hero-bg">
+        <video src="/uploads/videos/download.mp4" autoplay muted loop playsinline preload="metadata"></video>
+      </div>
+      <div class="featured-film__hero-overlay"></div>
+      <div class="featured-film__hero-content">
+        <h2 class="featured-film__names">Mason &amp; Jeff</h2>
+        <p class="featured-film__location">Aspen, Colorado</p>
+      </div>
+    </div>
+
+    <div class="featured-film__details reveal">
+      <div class="featured-film__details-inner">
+        <p class="featured-film__about-label">Sobre o Casamento</p>
+        <p class="featured-film__about-text">
+          O casamento de Mason e Jeffrey no Greystone Castle em Boulder, Colorado, foi uma celebração de tirar o fôlego, planejada com maestria pela visionária Karli Spangler Events. A visão de Mason para o dia era enraizada na autenticidade, optando por uma abordagem documental e espontânea para capturar a magia da união. Com vista para um campo sereno, o casal trocou votos em um cenário que equilibrava perfeitamente beleza natural com elegância discreta.
+        </p>
+        <p class="featured-film__about-text">
+          A recepção, realizada sob uma tenda deslumbrante adornada com lanternas suspensas, arranjos florais exuberantes e os sons de uma banda ao vivo, tornou-se uma celebração inesquecível onde a alegria e energia fluíram tão livremente quanto o amor entre Mason e Jeffrey.
+        </p>
+
+        <p class="featured-film__vendors-label">Fornecedores</p>
+        <div class="featured-film__vendors">
+          <p>Planejamento &amp; Design: Karli Spangler Events</p>
+          <p>Fotografia: KMac Photography &amp; Jenna Wren Photography</p>
+          <p>Flores: Moss Floral</p>
+          <p>Entretenimento: Jordan Kahn Orchestra</p>
+          <p>Local: Greystone Castle, Boulder</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="featured-film__testimonial reveal">
+      <div class="featured-film__testimonial-inner">
+        <p class="featured-film__testimonial-quote">
+          “São verdadeiros mágicos! Além de serem perfeitamente profissionais no dia, foram DIVERTIDOS. Foi seriamente como ter seus amigos acompanhando você durante todo o dia. Eu me emociono toda vez que reassisto nosso vídeo porque parece exatamente como lembro na minha memória.”
+        </p>
+        <p class="featured-film__testimonial-author">Mason &amp; Jeffrey</p>
+      </div>
+    </div>
+
+    <!-- VIDEO: Mason & Jeff -->
+    <section class="film-video-section reveal">
+      <div class="film-video-section__inner">
+        <p class="film-video-section__label">Assista ao Filme</p>
+        <h3 class="film-video-section__title">Mason &amp; Jeff</h3>
+        <div class="video-embed">
+          <iframe src="https://www.youtube.com/embed/VIDEO_ID_1" title="Mason &amp; Jeff — Filme de Casamento" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen loading="lazy"></iframe>
+        </div>
+      </div>
+    </section>
+
+    <div class="featured-film__gallery">
+      <img src="https://images.unsplash.com/photo-1465495976277-4387d4b0b4c6?w=500&q=80" alt="" loading="lazy" />
+      <img src="https://images.unsplash.com/photo-1519741497674-611481863552?w=500&q=80" alt="" loading="lazy" />
+      <img src="https://images.unsplash.com/photo-1511285560929-80b456fea0bc?w=500&q=80" alt="" loading="lazy" />
+    </div>
+  </section>
+
+  <!-- ====== FILM 2: McKenzie & Spencer ====== -->
+  <section class="featured-film" id="featured-films-1">
+    <div class="featured-film__hero">
+      <div class="featured-film__hero-bg">
+        <video src="/uploads/videos/download%20(1).mp4" autoplay muted loop playsinline preload="metadata"></video>
+      </div>
+      <div class="featured-film__hero-overlay"></div>
+      <div class="featured-film__hero-content">
+        <h2 class="featured-film__names">McKenzie &amp; Spencer</h2>
+        <p class="featured-film__location">Seattle, Washington</p>
+      </div>
+    </div>
+
+    <div class="featured-film__details reveal">
+      <div class="featured-film__details-inner">
+        <p class="featured-film__about-label">Sobre o Casamento</p>
+        <p class="featured-film__about-text">
+          O casamento de McKenzie e Spencer em Seattle foi uma combinação magistral da beleza do noroeste do Pacífico com elegância moderna. Com o cenário deslumbrante da orla marítima da cidade, a celebração capturou a essência do relacionamento deles — caloroso, aventureiro e profundamente conectado. Cada detalhe foi cuidadosamente curado para refletir o amor compartilhado pela natureza e sofisticação.
+        </p>
+      </div>
+    </div>
+
+    <!-- VIDEO: McKenzie & Spencer -->
+    <section class="film-video-section reveal">
+      <div class="film-video-section__inner">
+        <p class="film-video-section__label">Assista ao Filme</p>
+        <h3 class="film-video-section__title">McKenzie &amp; Spencer</h3>
+        <div class="video-embed">
+          <iframe src="https://www.youtube.com/embed/VIDEO_ID_2" title="McKenzie &amp; Spencer — Filme de Casamento" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen loading="lazy"></iframe>
+        </div>
+      </div>
+    </section>
+
+    <div class="featured-film__gallery">
+      <img src="https://images.unsplash.com/photo-1606216794074-735e91aa2c92?w=500&q=80" alt="" loading="lazy" />
+      <img src="https://images.unsplash.com/photo-1583939003579-730e3918a45a?w=500&q=80" alt="" loading="lazy" />
+      <img src="https://images.unsplash.com/photo-1537633552985-df8429e8048b?w=500&q=80" alt="" loading="lazy" />
+    </div>
+  </section>
+
+  <!-- ====== FILM 3: Adriana & Tyler ====== -->
+  <section class="featured-film" id="featured-films-2">
+    <div class="featured-film__hero">
+      <div class="featured-film__hero-bg">
+        <video src="/uploads/videos/download%20(2).mp4" autoplay muted loop playsinline preload="metadata"></video>
+      </div>
+      <div class="featured-film__hero-overlay"></div>
+      <div class="featured-film__hero-content">
+        <h2 class="featured-film__names">Adriana &amp; Tyler</h2>
+        <p class="featured-film__location">Salt Lake City, Utah</p>
+      </div>
+    </div>
+
+    <div class="featured-film__details reveal">
+      <div class="featured-film__details-inner">
+        <p class="featured-film__about-label">Sobre o Casamento</p>
+        <p class="featured-film__about-text">
+          O casamento de Adriana e Tyler em Salt Lake City foi uma celebração sofisticada que combinou elegância atemporal com intimidade sincera. Situado na deslumbrante paisagem montanhosa de Utah, o dia foi repleto de vistas de tirar o fôlego, lágrimas de alegria e momentos inesquecíveis que refletiram o laço profundo que compartilham.
+        </p>
+      </div>
+    </div>
+
+    <!-- VIDEO: Adriana & Tyler -->
+    <section class="film-video-section reveal">
+      <div class="film-video-section__inner">
+        <p class="film-video-section__label">Assista ao Filme</p>
+        <h3 class="film-video-section__title">Adriana &amp; Tyler</h3>
+        <div class="video-embed">
+          <iframe src="https://www.youtube.com/embed/VIDEO_ID_3" title="Adriana &amp; Tyler — Filme de Casamento" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen loading="lazy"></iframe>
+        </div>
+      </div>
+    </section>
+
+    <div class="featured-film__gallery">
+      <img src="https://images.unsplash.com/photo-1583939003579-730e3918a45a?w=500&q=80" alt="" loading="lazy" />
+      <img src="https://images.unsplash.com/photo-1465495976277-4387d4b0b4c6?w=500&q=80" alt="" loading="lazy" />
+      <img src="https://images.unsplash.com/photo-1606216794074-735e91aa2c92?w=500&q=80" alt="" loading="lazy" />
+    </div>
+  </section>
+
+  </div><!-- /data-cms="featured-films" -->
+
+  <!-- CTA -->
+  <section class="cta-section cta-section--cream reveal">
+    <p class="cta-section__subtitle">Sua História é a Próxima</p>
+    <h2 class="cta-section__title">Pronto Para Criar Algo Atemporal?</h2>
+    <a href="/contact.html" class="btn btn--solid-dark">Fale Conosco</a>
+  </section>
+
+  <!-- FOOTER -->
+  <footer class="footer">
+    <img src="/uploads/images/logo-transparente.png" alt="Stornoway Films" class="footer__logo-img" />
+    <p class="footer__tagline" data-cms="footer_tagline">Cinematografia de Casamentos</p>
+    <p class="footer__desc" data-cms="footer_description">Uma produtora internacional de filmes de casamento de luxo, construindo uma comunidade de aprendizado e inspiração para cineastas.</p>
+    <nav class="footer__nav">
+      <a href="/" class="footer__link">Início</a>
+      <a href="/about.html" class="footer__link">Sobre</a>
+      <a href="/experience.html" class="footer__link">Experiência</a>
+      <a href="/films.html" class="footer__link">Filmes</a>
+      <a href="/featured-films.html" class="footer__link">Destaques</a>
+      <a href="/contact.html" class="footer__link">Contato</a>
+    </nav>
+    <div class="footer__social">
+      <a href="https://www.instagram.com/stornowayfilms/" target="_blank" rel="noopener" aria-label="Instagram">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="5"/><circle cx="17.5" cy="6.5" r="1.5" fill="currentColor" stroke="none"/></svg>
+      </a>
+      <a href="mailto:contact@stornowayfilms.com" aria-label="Email">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M22 7l-10 7L2 7"/></svg>
+      </a>
+    </div>
+    <div class="footer__bottom">
+      <p class="footer__copy">&copy; 2026 Stornoway Films. Todos os direitos reservados.</p>
+    </div>
+  </footer>
+
+  <script src="/assets/js/main.js"></script>
+  <script src="/assets/js/cms.js"></script>
+</body>
+</html>

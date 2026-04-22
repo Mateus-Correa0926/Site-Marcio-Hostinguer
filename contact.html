@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="description" content="Contato — Stornoway Films — Preserve sua história com arte e cuidado incomparáveis." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=Great+Vibes&family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <title>Contato — Stornoway Films</title>
+  <link rel="stylesheet" href="/assets/css/style.css" />
+</head>
+<body>
+
+  <!-- NAV -->
+  <nav class="nav nav--transparent" id="navbar">
+    <a href="/" class="nav__logo"><img src="/uploads/images/logo-transparente.png" alt="Stornoway Films" class="nav__logo-img" /></a>
+    <div class="nav__links">
+      <a href="/" class="nav__link">Início</a>
+      <a href="/about.html" class="nav__link">Sobre</a>
+      <a href="/experience.html" class="nav__link">Experiência</a>
+      <a href="/films.html" class="nav__link">Filmes</a>
+      <a href="/featured-films.html" class="nav__link">Destaques</a>
+      <a href="/contact.html" class="nav__link nav__link--active">Contato</a>
+      <a href="https://www.instagram.com/stornowayfilms/" target="_blank" rel="noopener" class="nav__social" aria-label="Instagram">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="5"/><circle cx="17.5" cy="6.5" r="1.5" fill="currentColor" stroke="none"/></svg>
+      </a>
+    </div>
+    <button class="nav__hamburger" id="hamburger" aria-label="Menu"><span></span><span></span><span></span></button>
+  </nav>
+  <div class="nav__mobile" id="mobileMenu">
+    <a href="/" class="nav__mobile-link">Início</a>
+    <a href="/about.html" class="nav__mobile-link">Sobre</a>
+    <a href="/experience.html" class="nav__mobile-link">Experiência</a>
+    <a href="/films.html" class="nav__mobile-link">Filmes</a>
+    <a href="/featured-films.html" class="nav__mobile-link">Destaques</a>
+    <a href="/contact.html" class="nav__mobile-link">Contato</a>
+  </div>
+
+  <!-- CONTACT HERO -->
+  <section class="contact-hero">
+    <p class="contact-hero__label">Fale com a Stornoway Films</p>
+    <h1 class="contact-hero__title">Preserve Sua História Com<br>Arte &amp; Cuidado Incomparáveis</h1>
+    <p class="contact-hero__text">
+      Se você é um cerimonialista ou casal que deseja nossos serviços de filmagem de casamento, por favor preencha o formulário abaixo. Para outras consultas, entre em contato pelo
+      <a href="mailto:contact@stornowayfilms.com" class="contact-hero__email">contact@stornowayfilms.com</a>.
+    </p>
+  </section>
+
+  <!-- CONTACT FORM -->
+  <section class="contact-form-section">
+    <div class="contact-form-section__inner">
+      <!-- Tabs -->
+      <div class="contact-tabs">
+        <button class="contact-tab contact-tab--active" data-tab="couples">Para Casais</button>
+        <button class="contact-tab" data-tab="planners">Para Cerimonialistas</button>
+      </div>
+
+      <!-- Couples form -->
+      <form class="contact-form" id="couplesForm" action="/api/contact" method="POST">
+        <div class="form-row">
+          <div class="form-field">
+            <label for="c-first-name">Nome</label>
+            <input type="text" id="c-first-name" name="first_name" required autocomplete="given-name" />
+          </div>
+          <div class="form-field">
+            <label for="c-last-name">Sobrenome</label>
+            <input type="text" id="c-last-name" name="last_name" required autocomplete="family-name" />
+          </div>
+        </div>
+        <div class="form-field">
+          <label for="c-email">E-mail</label>
+          <input type="email" id="c-email" name="email" required autocomplete="email" />
+        </div>
+        <div class="form-row">
+          <div class="form-field">
+            <label for="c-date">Data do Casamento</label>
+            <input type="date" id="c-date" name="wedding_date" />
+          </div>
+          <div class="form-field">
+            <label for="c-location">Local do Casamento</label>
+            <input type="text" id="c-location" name="location" />
+          </div>
+        </div>
+        <div class="form-field">
+          <label for="c-budget">Orçamento Estimado</label>
+          <select id="c-budget" name="budget">
+            <option value="">Selecione uma faixa</option>
+            <option value="20000-30000">R$100.000 – R$150.000</option>
+            <option value="30000-50000">R$150.000 – R$250.000</option>
+            <option value="50000+">R$250.000+</option>
+          </select>
+        </div>
+        <div class="form-field">
+          <label for="c-referral">Como Nos Conheceu?</label>
+          <input type="text" id="c-referral" name="referral" />
+        </div>
+        <div class="form-field">
+          <label for="c-message">Conte-nos Sobre Seu Dia</label>
+          <textarea id="c-message" name="message" rows="5"></textarea>
+        </div>
+        <input type="hidden" name="type" value="couple" />
+        <div class="form-submit">
+          <button type="submit" class="btn btn--solid-dark">Enviar Consulta</button>
+        </div>
+      </form>
+
+      <!-- Planners form (hidden by default) -->
+      <form class="contact-form" id="plannersForm" action="/api/contact" method="POST" style="display:none;">
+        <div class="form-row">
+          <div class="form-field">
+            <label for="p-name">Seu Nome</label>
+            <input type="text" id="p-name" name="name" required autocomplete="name" />
+          </div>
+          <div class="form-field">
+            <label for="p-company">Empresa</label>
+            <input type="text" id="p-company" name="company" autocomplete="organization" />
+          </div>
+        </div>
+        <div class="form-field">
+          <label for="p-email">E-mail</label>
+          <input type="email" id="p-email" name="email" required autocomplete="email" />
+        </div>
+        <div class="form-row">
+          <div class="form-field">
+            <label for="p-date">Data do Evento</label>
+            <input type="date" id="p-date" name="wedding_date" />
+          </div>
+          <div class="form-field">
+            <label for="p-location">Local do Evento</label>
+            <input type="text" id="p-location" name="location" />
+          </div>
+        </div>
+        <div class="form-field">
+          <label for="p-message">Detalhes Adicionais</label>
+          <textarea id="p-message" name="message" rows="5"></textarea>
+        </div>
+        <input type="hidden" name="type" value="planner" />
+        <div class="form-submit">
+          <button type="submit" class="btn btn--solid-dark">Enviar Consulta</button>
+        </div>
+      </form>
+    </div>
+  </section>
+
+  <!-- CTA -->
+  <section class="cta-section cta-section--black reveal">
+    <p class="cta-section__subtitle" style="color: rgba(255,255,255,0.7);">Mal Podemos Esperar Para Ouvir de Você</p>
+    <h2 class="cta-section__title" style="color:var(--white); max-width:600px; margin:0 auto;">
+      Sua História de Amor Merece Ser Contada Com Intenção
+    </h2>
+  </section>
+
+  <!-- IMAGE BANNER -->
+  <section class="image-banner">
+    <img src="https://images.unsplash.com/photo-1519741497674-611481863552?w=400&q=80" alt="" loading="lazy" />
+    <img src="https://images.unsplash.com/photo-1583939003579-730e3918a45a?w=400&q=80" alt="" loading="lazy" />
+    <img src="https://images.unsplash.com/photo-1606216794074-735e91aa2c92?w=400&q=80" alt="" loading="lazy" />
+    <img src="https://images.unsplash.com/photo-1465495976277-4387d4b0b4c6?w=400&q=80" alt="" loading="lazy" />
+  </section>
+
+  <!-- FOOTER -->
+  <footer class="footer">
+    <img src="/uploads/images/logo-transparente.png" alt="Stornoway Films" class="footer__logo-img" />
+    <p class="footer__tagline" data-cms="footer_tagline">Cinematografia de Casamentos</p>
+    <p class="footer__desc" data-cms="footer_description">Uma produtora internacional de filmes de casamento de luxo, construindo uma comunidade de aprendizado e inspiração para cineastas.</p>
+    <nav class="footer__nav">
+      <a href="/" class="footer__link">Início</a>
+      <a href="/about.html" class="footer__link">Sobre</a>
+      <a href="/experience.html" class="footer__link">Experiência</a>
+      <a href="/films.html" class="footer__link">Filmes</a>
+      <a href="/featured-films.html" class="footer__link">Destaques</a>
+      <a href="/contact.html" class="footer__link">Contato</a>
+    </nav>
+    <div class="footer__social">
+      <a href="https://www.instagram.com/stornowayfilms/" target="_blank" rel="noopener" aria-label="Instagram">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="5"/><circle cx="17.5" cy="6.5" r="1.5" fill="currentColor" stroke="none"/></svg>
+      </a>
+      <a href="mailto:contact@stornowayfilms.com" aria-label="Email">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M22 7l-10 7L2 7"/></svg>
+      </a>
+    </div>
+    <div class="footer__bottom">
+      <p class="footer__copy">&copy; 2026 Stornoway Films. Todos os direitos reservados.</p>
+    </div>
+  </footer>
+
+  <script src="/assets/js/main.js"></script>
+  <script src="/assets/js/cms.js"></script>
+</body>
+</html>

@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="description" content="Stornoway Films — O novo padrão em cinematografia de casamentos. Capturando sua história com dedicação incomparável à qualidade." />
+  <meta name="theme-color" content="#0A0A0A" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="preload" as="image" href="/uploads/images/logo-transparente.png" fetchpriority="high" />
+  <link rel="preload" as="style" href="/assets/css/style.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=Great+Vibes&family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <title>Márcio Imagens e Filmes — Cinematografia de Casamentos</title>
+  <link rel="stylesheet" href="/assets/css/style.css" />
+</head>
+<body class="intro-active">
+
+  <!-- ====== NETFLIX INTRO ====== -->
+  <div class="intro-overlay" id="introOverlay">
+    <img src="/uploads/images/logo-transparente.png" alt="Márcio Imagens e Filmes" class="intro-overlay__logo" fetchpriority="high" decoding="async" />
+  </div>
+  <script>
+  (function(){
+    var o=document.getElementById('introOverlay');
+    if(!o)return;
+    // Respeita preferência de movimento reduzido e libera o scroll cedo
+    var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    var doneMs = reduce ? 500 : 1500;
+    var fadeMs = reduce ? 200 : 350;
+    var finished = false;
+    // Permite pular a intro com clique/toque/tecla
+    function finishIntro() {
+      if (finished) return;
+      finished = true;
+      if (o.parentNode) o.parentNode.removeChild(o);
+      document.body.classList.remove('intro-active');
+    }
+    function startOutro() {
+      if (o.classList.contains('intro--done')) return;
+      o.classList.add('intro--done');
+      setTimeout(finishIntro, fadeMs);
+    }
+    o.addEventListener('click', startOutro, { passive: true });
+    window.addEventListener('keydown', function(e){ if(e.key==='Escape'||e.key===' '||e.key==='Enter') startOutro(); }, { once: true });
+    setTimeout(startOutro, doneMs);
+  })();
+  </script>
+
+  <!-- ====== NAVIGATION ====== -->
+  <nav class="nav nav--transparent" id="navbar">
+    <a href="/" class="nav__logo">
+      <img src="/uploads/images/logo-transparente.png" alt="Márcio Imagens e Filmes" class="nav__logo-img" />
+    </a>
+    <div class="nav__links">
+      <a href="/" class="nav__link nav__link--active">Início</a>
+      <a href="/about.html" class="nav__link">Sobre</a>
+      <a href="/experience.html" class="nav__link">Experiência</a>
+      <a href="/films.html" class="nav__link">Filmes</a>
+      <a href="/featured-films.html" class="nav__link">Destaques</a>
+      <a href="/contact.html" class="nav__link">Contato</a>
+      <a href="https://www.instagram.com/stornowayfilms/" target="_blank" rel="noopener" class="nav__social" aria-label="Instagram">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="5"/><circle cx="17.5" cy="6.5" r="1.5" fill="currentColor" stroke="none"/></svg>
+      </a>
+    </div>
+    <button class="nav__hamburger" id="hamburger" aria-label="Menu">
+      <span></span><span></span><span></span>
+    </button>
+  </nav>
+
+  <!-- Mobile Menu -->
+  <div class="nav__mobile" id="mobileMenu">
+    <a href="/" class="nav__mobile-link">Início</a>
+    <a href="/about.html" class="nav__mobile-link">Sobre</a>
+    <a href="/experience.html" class="nav__mobile-link">Experiência</a>
+    <a href="/films.html" class="nav__mobile-link">Filmes</a>
+    <a href="/featured-films.html" class="nav__mobile-link">Destaques</a>
+    <a href="/contact.html" class="nav__mobile-link">Contato</a>
+  </div>
+
+  <!-- ====== HERO ====== -->
+  <section class="hero">
+    <div class="hero__bg">
+      <video src="/uploads/videos/download.mp4" autoplay muted loop playsinline preload="metadata"></video>
+    </div>
+    <div class="hero__overlay"></div>
+    <div class="hero__content">
+      <img src="/uploads/images/logo-transparente.png" alt="Márcio Imagens e Filmes" class="hero__logo" />
+      <p class="hero__subtitle" data-cms="hero_subtitle_bottom">Cinematografia de Casamentos</p>
+      <a href="/experience.html" class="btn btn--outline-white" style="margin-top: 20px;" data-cms="hero_cta_text">Descubra a Experiência</a>
+    </div>
+  </section>
+
+  <!-- ====== BRAND STATEMENT ====== -->
+  <section class="brand-statement reveal">
+    <div class="brand-statement__inner">
+      <p class="brand-statement__text" data-cms="brand_statement">
+        O propósito da Stornoway Films é entregar filmes de casamento de altíssima qualidade para casais prontos para celebrar seu amor com estilo. De aventuras românticas luxuosas em Veneza a momentos íntimos nas terras altas da Escócia, a Stornoway Films atende casais <em>sofisticados e aventureiros</em> ao redor do mundo.
+      </p>
+    </div>
+  </section>
+
+  <!-- ====== THE RE-IMAGINED STANDARD ====== -->
+  <section class="cta-section cta-section--black reveal">
+    <span class="section-label section-label--light">O Novo Padrão</span>
+    <h2 class="cta-section__title" style="color: var(--white); max-width: 700px; margin: 0 auto 20px;">O Novo Padrão em Cinematografia de Casamentos</h2>
+    <p style="font-family: var(--font-sans); font-size: 0.75rem; font-weight: 300; line-height: 1.9; color: rgba(255,255,255,0.5); max-width: 550px; margin: 0 auto;">
+      Capturando sua história com dedicação incomparável à qualidade.
+    </p>
+  </section>
+
+
+  <!-- ====== MEET THE FOUNDERS ====== -->
+  <section class="split split--cream reveal">
+    <div class="split__image">
+      <img src="/uploads/images/foto-do-fundador.png" alt="Márcio — Fundador" loading="lazy" data-cms="founder_image" />
+    </div>
+    <div class="split__content">
+      <span class="split__heading">Conheça o Fundador</span>
+      <h2 class="split__title">Capturando Sua História<span>Com Dedicação Incomparável</span></h2>
+      <p class="split__names" data-cms="founder_name">Márcio</p>
+      <p class="split__text" data-cms="founder_bio">
+        Fundador da Stornoway Films, Márcio é reconhecido por sua abordagem refinada e cinematográfica na captura de histórias de amor ao redor do mundo.
+      </p>
+      <a href="/about.html" class="btn btn--outline-dark">Saiba Mais</a>
+    </div>
+  </section>
+
+  <!-- ====== FEATURED FILMS PREVIEW ====== -->
+  <section class="films-grid reveal">
+    <div class="films-grid__header">
+      <span class="section-label section-label--light">Portfólio</span>
+      <h2 class="films-grid__title">Filmes em Destaque</h2>
+      <p class="films-grid__subtitle">Da sua primeira consulta à entrega do seu filme de casamento, estamos comprometidos com a excelência em cada etapa.</p>
+    </div>
+    <div class="films-grid__items">
+      <a href="/featured-films.html" class="film-card">
+        <img src="https://images.unsplash.com/photo-1583939003579-730e3918a45a?w=600&q=80" alt="Adriana & Tyler" loading="lazy" />
+        <div class="film-card__overlay">
+          <span class="film-card__name">Adriana &amp; Tyler</span>
+          <span class="film-card__location">Salt Lake City, UT</span>
+        </div>
+      </a>
+      <a href="/featured-films.html" class="film-card">
+        <img src="https://images.unsplash.com/photo-1606216794074-735e91aa2c92?w=600&q=80" alt="McKenzie & Spencer" loading="lazy" />
+        <div class="film-card__overlay">
+          <span class="film-card__name">McKenzie &amp; Spencer</span>
+          <span class="film-card__location">Seattle, WA</span>
+        </div>
+      </a>
+      <a href="/featured-films.html" class="film-card">
+        <img src="https://images.unsplash.com/photo-1465495976277-4387d4b0b4c6?w=600&q=80" alt="Mason & Jeff" loading="lazy" />
+        <div class="film-card__overlay">
+          <span class="film-card__name">Mason &amp; Jeff</span>
+          <span class="film-card__location">Aspen, CO</span>
+        </div>
+      </a>
+    </div>
+    <a href="/films.html" class="btn btn--outline-white">Ver Todos os Filmes</a>
+  </section>
+
+  <!-- ====== DEPOIMENTO ====== -->
+  <section class="testimonial reveal">
+    <div class="testimonial__bg">
+      <video src="/uploads/videos/download%20(2).mp4" autoplay muted loop playsinline preload="metadata"></video>
+    </div>
+    <div class="testimonial__overlay"></div>
+    <div class="testimonial__content">
+      <p class="testimonial__label">Luxo Atemporal</p>
+      <h2 class="testimonial__heading">Amor dos Clientes</h2>
+      <p class="testimonial__quote" data-cms="testimonial_quote">
+        "Nem sei por onde começar. O trabalho deles fala por si só. Nunca me senti tão confortável diante de uma câmera. O vídeo que criaram... <em>foi uma obra-prima.</em> Foi tão pessoal à nossa história, nosso relacionamento e jornada. Não consigo recomendá-los o suficiente."
+      </p>
+      <p class="testimonial__author" data-cms="testimonial_author">Dallin e Morgan</p>
+    </div>
+  </section>
+
+  <!-- ====== SHOWREEL VIDEO ====== -->
+  <section class="film-video-section reveal">
+    <div class="film-video-section__inner">
+      <p class="film-video-section__label">Assista</p>
+      <h3 class="film-video-section__title">Showreel 2026</h3>
+      <div class="video-embed">
+        <iframe src="https://www.youtube.com/embed/VIDEO_ID_SHOWREEL" title="Stornoway Films — Showreel 2026" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen loading="lazy"></iframe>
+      </div>
+    </div>
+  </section>
+
+  <!-- ====== CTA ====== -->
+  <section class="cta-section cta-section--cream reveal">
+    <p class="cta-section__subtitle">Vamos Capturar Sua História</p>
+    <h2 class="cta-section__title">Viva um Filme de Casamento<br>Tão Inesquecível Quanto Seu Amor</h2>
+    <a href="/contact.html" class="btn btn--solid-dark">Entre em Contato</a>
+  </section>
+
+  <!-- ====== IMAGE BANNER ====== -->
+  <section class="image-banner">
+    <img src="https://images.unsplash.com/photo-1519741497674-611481863552?w=400&q=80" alt="" loading="lazy" />
+    <img src="https://images.unsplash.com/photo-1583939003579-730e3918a45a?w=400&q=80" alt="" loading="lazy" />
+    <img src="https://images.unsplash.com/photo-1606216794074-735e91aa2c92?w=400&q=80" alt="" loading="lazy" />
+    <img src="https://images.unsplash.com/photo-1465495976277-4387d4b0b4c6?w=400&q=80" alt="" loading="lazy" />
+  </section>
+
+  <!-- ====== FOOTER ====== -->
+  <footer class="footer">
+    <img src="/uploads/images/logo-transparente.png" alt="Stornoway Films" class="footer__logo-img" loading="lazy" decoding="async" />
+    <p class="footer__tagline" data-cms="footer_tagline">Cinematografia de Casamentos</p>
+    <p class="footer__desc" data-cms="footer_description">
+      Uma produtora internacional de filmes de casamento de luxo, construindo uma comunidade de aprendizado e inspiração para cineastas.
+    </p>
+    <nav class="footer__nav">
+      <a href="/" class="footer__link">Início</a>
+      <a href="/about.html" class="footer__link">Sobre</a>
+      <a href="/experience.html" class="footer__link">Experiência</a>
+      <a href="/films.html" class="footer__link">Filmes</a>
+      <a href="/featured-films.html" class="footer__link">Destaques</a>
+      <a href="/contact.html" class="footer__link">Contato</a>
+    </nav>
+    <div class="footer__social">
+      <a href="https://www.instagram.com/stornowayfilms/" target="_blank" rel="noopener" aria-label="Instagram">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="5"/><circle cx="17.5" cy="6.5" r="1.5" fill="currentColor" stroke="none"/></svg>
+      </a>
+      <a href="mailto:contact@stornowayfilms.com" aria-label="Email">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M22 7l-10 7L2 7"/></svg>
+      </a>
+    </div>
+    <div class="footer__bottom">
+      <p class="footer__copy">&copy; 2026 Stornoway Films. Todos os direitos reservados.</p>
+    </div>
+  </footer>
+
+  <script src="/assets/js/main.js" defer></script>
+  <script src="/assets/js/cms.js" defer></script>
+</body>
+</html>

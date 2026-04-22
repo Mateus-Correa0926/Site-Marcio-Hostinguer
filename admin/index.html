@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Admin — Stornoway Films</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/admin/css/admin.css" />
+</head>
+<body class="admin-body">
+
+  <!-- LOGIN SCREEN -->
+  <div id="loginScreen" class="login-screen">
+    <div class="login-card">
+      <h1 class="login-card__logo">Stornoway Films</h1>
+      <p class="login-card__sub">Painel Administrativo</p>
+      <div id="loginError" class="login-error"></div>
+      <form id="loginForm">
+        <div class="form-group">
+          <label class="form-label">Usuário</label>
+          <input type="text" class="form-input" id="loginUser" autocomplete="username" required />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Senha</label>
+          <input type="password" class="form-input" id="loginPass" autocomplete="current-password" required />
+        </div>
+        <button type="submit" class="btn btn-primary btn-block">Entrar</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- ADMIN LAYOUT (hidden until auth) -->
+  <div id="adminLayout" class="admin-layout" style="display:none;">
+
+    <!-- SIDEBAR -->
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar__logo">
+        <h1>Stornoway Films</h1>
+        <span>Painel Administrativo</span>
+      </div>
+      <nav class="sidebar__nav" id="sidebarNav">
+        <a href="#/projects" class="sidebar__link" data-page="projects">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+          Projetos
+        </a>
+        <a href="#/media" class="sidebar__link" data-page="media">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="2" width="20" height="20" rx="3"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>
+          Biblioteca de Mídia
+        </a>
+        <a href="#/fallback" class="sidebar__link" data-page="fallback">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 2v4m0 12v4m-7-10H1m22 0h-4m-2.636-6.364l-2.828 2.828m-5.072 5.072l-2.828 2.828m0-10.728l2.828 2.828m5.072 5.072l2.828 2.828"/></svg>
+          Fallback Pool
+        </a>
+        <a href="#/settings" class="sidebar__link" data-page="settings">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+          Textos do Site
+        </a>
+      </nav>
+      <div class="sidebar__footer">
+        <a href="/" target="_blank">Ver site &rarr;</a>
+        <br><span id="adminUsername"></span> &middot; <a href="#" id="logoutBtn">Sair</a>
+      </div>
+    </aside>
+
+    <!-- MAIN -->
+    <div class="main-content">
+      <header class="main-header">
+        <div style="display:flex;align-items:center;gap:12px;">
+          <button class="sidebar-toggle" id="sidebarToggle">&#9776;</button>
+          <h2 class="main-header__title" id="pageTitle">Projetos</h2>
+        </div>
+        <div class="main-header__actions" id="headerActions"></div>
+      </header>
+      <div class="main-body" id="mainBody">
+        <div class="spinner"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL CONTAINER -->
+  <div class="modal-overlay" id="modalOverlay">
+    <div class="modal" id="modalBox">
+      <div class="modal__header">
+        <h3 class="modal__title" id="modalTitle">Modal</h3>
+        <button class="modal__close" id="modalClose">&times;</button>
+      </div>
+      <div class="modal__body" id="modalBody"></div>
+      <div class="modal__footer" id="modalFooter"></div>
+    </div>
+  </div>
+
+  <!-- TOAST -->
+  <div class="toast-container" id="toastContainer"></div>
+
+  <!-- CONFIRM DIALOG -->
+  <div id="confirmOverlay" class="confirm-overlay" style="display:none;"></div>
+
+  <script src="/admin/js/app.js"></script>
+</body>
+</html>

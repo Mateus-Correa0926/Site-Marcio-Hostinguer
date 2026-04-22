@@ -1,0 +1,8 @@
+setup.php
+test-admin.html
+test-api.php
+migrations/
+.github/
+.vscode/
+.idea/
+node_modules/
