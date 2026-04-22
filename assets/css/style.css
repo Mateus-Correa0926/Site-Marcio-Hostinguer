@@ -319,9 +319,9 @@ input, textarea, select { font-family: var(--font-sans); }
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-start;
   gap: 28px;
-  padding: 24px;
+  padding: 72px 24px 24px;
   transform: translateX(100%);
   transition: transform 0.35s cubic-bezier(0.22, 0.61, 0.36, 1);
   box-shadow: -12px 0 40px rgba(0,0,0,0.4);
