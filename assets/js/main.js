@@ -38,12 +38,12 @@
     }
   }
 
-  /* ---- Safety: force-remove intro overlay after 3s in any edge case ---- */
+  /* ---- Safety: force-remove intro overlay after 4s in any edge case ---- */
   setTimeout(function () {
     document.body.classList.remove('intro-active');
     var ov = document.getElementById('introOverlay');
     if (ov && ov.parentNode) ov.parentNode.removeChild(ov);
-  }, 3000);
+  }, 4000);
 
   /* ---- Safety: reveal everything after 4s if IntersectionObserver somehow failed ---- */
   setTimeout(function () {

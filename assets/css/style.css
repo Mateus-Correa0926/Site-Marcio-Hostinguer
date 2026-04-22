@@ -63,7 +63,7 @@ body {
   opacity: 0;
   transform: scale(0.92) translateZ(0);
   will-change: transform, opacity;
-  animation: introLogoIn 0.75s cubic-bezier(0.22, 0.61, 0.36, 1) forwards;
+  animation: introLogoIn 1.2s cubic-bezier(0.22, 0.61, 0.36, 1) forwards;
 }
 .intro--done .intro-overlay__logo {
   animation: none;
@@ -85,9 +85,9 @@ body {
 body.intro-active {
   overflow: hidden !important;
 }
-/* Safety: if JS fails, auto-dismiss intro after 3.5s */
+/* Safety: if JS fails, auto-dismiss intro after 4.5s */
 .intro-overlay {
-  animation: introSafetyFade 0s linear 3.5s forwards;
+  animation: introSafetyFade 0s linear 4.5s forwards;
 }
 @keyframes introSafetyFade {
   to { opacity: 0; visibility: hidden; pointer-events: none; }
