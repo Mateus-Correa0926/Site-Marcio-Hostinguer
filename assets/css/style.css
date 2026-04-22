@@ -370,8 +370,8 @@ body.no-scroll { overflow: hidden !important; }
 .nav__mobile-link:hover { color: var(--white); }
 
 @media (max-width: 900px) {
-  .nav__links { display: none; }
-  .nav__hamburger { display: block; }
+  .nav__links { display: none !important; }
+  .nav__hamburger { display: block !important; }
   .nav { padding: 0 20px; }
   .nav__logo-img { height: clamp(96px, 14vh, 150px); }
 }
