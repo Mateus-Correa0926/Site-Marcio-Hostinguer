@@ -51,4 +51,18 @@ RewriteRule ^ index.html [L]
         Header set Pragma "no-cache"
         Header set Expires "0"
     </FilesMatch>
+    # Cache longo para assets versionados (?v=...) — browser usa cache, muda só com novo v
+    <FilesMatch "\.(css|js|jpg|jpeg|png|webp|gif|svg|ico|woff|woff2|ttf|mp4|webm)$">
+        Header set Cache-Control "public, max-age=31536000, immutable"
+    </FilesMatch>
+</IfModule>
+
+# Compressão gzip
+<IfModule mod_deflate.c>
+    AddOutputFilterByType DEFLATE text/html text/css text/javascript application/javascript application/json image/svg+xml text/xml application/xml
+</IfModule>
+
+# Brotli se disponível
+<IfModule mod_brotli.c>
+    AddOutputFilterByType BROTLI_COMPRESS text/html text/css text/javascript application/javascript application/json image/svg+xml text/xml application/xml
 </IfModule>
