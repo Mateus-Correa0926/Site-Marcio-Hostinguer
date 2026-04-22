@@ -411,6 +411,7 @@ body.no-scroll { overflow: hidden !important; }
 .hero__bg {
   position: absolute;
   inset: 0;
+  background: #000 linear-gradient(135deg, #0a0a0a 0%, #1c1c1c 100%);
 }
 .hero__bg img,
 .hero__bg video {
@@ -732,6 +733,7 @@ body.no-scroll { overflow: hidden !important; }
 .testimonial__bg {
   position: absolute;
   inset: 0;
+  background: #000 linear-gradient(135deg, #0a0a0a 0%, #1c1c1c 100%);
 }
 .testimonial__bg img,
 .testimonial__bg video {

@@ -147,9 +147,6 @@
       vid.playsInline = true;
       vid.loop = true;
       vid.setAttribute('loop', '');
-      // Prefer full preload so the loop is seamless (no re-buffer at the end)
-      try { vid.preload = 'auto'; } catch (e) {}
-      vid.setAttribute('preload', 'auto');
 
       var tryPlay = function () {
         var p = vid.play();
