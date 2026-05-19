@@ -144,48 +144,59 @@
   </section>
 
   <!-- CALENDAR SCHEDULER -->
-  <section class="schedule-section reveal">
+  <section class="schedule-section reveal" id="meetingScheduler">
     <div class="schedule-section__inner">
-      <p class="section-label section-label--dark">Agenda</p>
-      <h2 class="schedule-section__title">Agende Sua Reunião</h2>
-      <p class="schedule-section__text">Veja os horários livres na agenda do admin e solicite seu horário em poucos cliques.</p>
 
-      <div class="schedule-card" id="meetingScheduler">
-        <div class="schedule-controls">
-          <div class="schedule-field">
-            <label for="meeting-date">Selecione uma data</label>
-            <input type="date" id="meeting-date" min="2026-01-01" />
-          </div>
-          <button type="button" class="btn btn--solid-dark" id="load-slots-btn">Ver horários</button>
+      <span class="section-label section-label--dark">Agenda</span>
+      <h2 class="schedule-section__title">Agende Sua <em>Reunião</em></h2>
+      <p class="schedule-section__text">Consulte os horários disponíveis e escolha o melhor momento para conversarmos sobre o seu dia especial.</p>
+
+      <!-- Seleção de data -->
+      <div class="schedule-date-row">
+        <div class="form-field schedule-date-field">
+          <label for="meeting-date">Data preferida</label>
+          <input type="date" id="meeting-date" min="2026-01-01" />
+        </div>
+        <button type="button" class="btn btn--outline-dark schedule-load-btn" id="load-slots-btn">Ver horários</button>
+      </div>
+
+      <!-- Feedback de status -->
+      <div class="schedule-status" id="schedule-status" aria-live="polite"></div>
+
+      <!-- Grade de horários -->
+      <div class="schedule-slots" id="schedule-slots"></div>
+
+      <!-- Formulário de confirmação (aparece ao selecionar horário) -->
+      <form class="schedule-booking" id="meeting-booking-form" style="display:none;" novalidate>
+        <div class="schedule-booking__header">
+          <span class="section-label section-label--dark">Confirmar Horário</span>
+          <p class="schedule-selected-text" id="meeting-slot-selected"></p>
         </div>
 
-        <div class="schedule-status" id="schedule-status" aria-live="polite"></div>
-        <div class="schedule-slots" id="schedule-slots"></div>
-
-        <form class="schedule-booking" id="meeting-booking-form" style="display:none;">
-          <h3>Solicitar Horário</h3>
-          <div class="form-row">
-            <div class="form-field">
-              <label for="meeting-name">Nome</label>
-              <input type="text" id="meeting-name" name="name" required />
-            </div>
-            <div class="form-field">
-              <label for="meeting-email">E-mail</label>
-              <input type="email" id="meeting-email" name="email" required />
-            </div>
+        <div class="form-row">
+          <div class="form-field">
+            <label for="meeting-name">Nome</label>
+            <input type="text" id="meeting-name" name="name" required autocomplete="name" />
           </div>
           <div class="form-field">
-            <label for="meeting-notes">Observações (opcional)</label>
-            <textarea id="meeting-notes" name="notes" rows="3"></textarea>
+            <label for="meeting-email">E-mail</label>
+            <input type="email" id="meeting-email" name="email" required autocomplete="email" />
           </div>
-          <input type="hidden" id="meeting-slot-date" name="date" />
-          <input type="hidden" id="meeting-slot-start" name="start_time" />
-          <div class="schedule-booking__footer">
-            <p id="meeting-slot-selected"></p>
-            <button type="submit" class="btn btn--solid-dark">Confirmar reunião</button>
-          </div>
-        </form>
-      </div>
+        </div>
+
+        <div class="form-field">
+          <label for="meeting-notes">Observações (opcional)</label>
+          <textarea id="meeting-notes" name="notes" rows="3"></textarea>
+        </div>
+
+        <input type="hidden" id="meeting-slot-date" name="date" />
+        <input type="hidden" id="meeting-slot-start" name="start_time" />
+
+        <div class="form-submit">
+          <button type="submit" class="btn btn--solid-dark">Confirmar Reunião</button>
+        </div>
+      </form>
+
     </div>
   </section>
 
