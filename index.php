@@ -5,6 +5,7 @@
 
 require_once __DIR__ . '/config/database.php';
 require_once __DIR__ . '/config/cors.php';
+require_once __DIR__ . '/config/google_calendar.php';
 require_once __DIR__ . '/helpers/jwt.php';
 require_once __DIR__ . '/helpers/response.php';
 require_once __DIR__ . '/helpers/upload.php';
@@ -28,8 +29,8 @@ $action = $segments[2] ?? null;
 
 // Rotas públicas (não requerem autenticação)
 $publicRoutes = [
-    'GET' => ['pages', 'projects', 'services', 'settings', 'menu', 'testimonials', 'media', 'project-slots', 'fallback-pool'],
-    'POST' => ['auth/login', 'contact']
+    'GET' => ['pages', 'projects', 'services', 'settings', 'menu', 'testimonials', 'media', 'project-slots', 'fallback-pool', 'schedule'],
+    'POST' => ['auth/login', 'contact', 'schedule']
 ];
 
 // Verificar se é rota pública
@@ -97,6 +98,11 @@ switch ($resource) {
     case 'contact':
         require_once __DIR__ . '/api/contact.php';
         handleContact($method, $id, $action, $currentUser);
+        break;
+
+    case 'schedule':
+        require_once __DIR__ . '/api/schedule.php';
+        handleSchedule($method, $id, $action, $currentUser);
         break;
 
     case 'testimonials':

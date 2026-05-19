@@ -143,6 +143,52 @@
     </div>
   </section>
 
+  <!-- CALENDAR SCHEDULER -->
+  <section class="schedule-section reveal">
+    <div class="schedule-section__inner">
+      <p class="section-label section-label--dark">Agenda</p>
+      <h2 class="schedule-section__title">Agende Sua Reunião</h2>
+      <p class="schedule-section__text">Veja os horários livres na agenda do admin e solicite seu horário em poucos cliques.</p>
+
+      <div class="schedule-card" id="meetingScheduler">
+        <div class="schedule-controls">
+          <div class="schedule-field">
+            <label for="meeting-date">Selecione uma data</label>
+            <input type="date" id="meeting-date" min="2026-01-01" />
+          </div>
+          <button type="button" class="btn btn--solid-dark" id="load-slots-btn">Ver horários</button>
+        </div>
+
+        <div class="schedule-status" id="schedule-status" aria-live="polite"></div>
+        <div class="schedule-slots" id="schedule-slots"></div>
+
+        <form class="schedule-booking" id="meeting-booking-form" style="display:none;">
+          <h3>Solicitar Horário</h3>
+          <div class="form-row">
+            <div class="form-field">
+              <label for="meeting-name">Nome</label>
+              <input type="text" id="meeting-name" name="name" required />
+            </div>
+            <div class="form-field">
+              <label for="meeting-email">E-mail</label>
+              <input type="email" id="meeting-email" name="email" required />
+            </div>
+          </div>
+          <div class="form-field">
+            <label for="meeting-notes">Observações (opcional)</label>
+            <textarea id="meeting-notes" name="notes" rows="3"></textarea>
+          </div>
+          <input type="hidden" id="meeting-slot-date" name="date" />
+          <input type="hidden" id="meeting-slot-start" name="start_time" />
+          <div class="schedule-booking__footer">
+            <p id="meeting-slot-selected"></p>
+            <button type="submit" class="btn btn--solid-dark">Confirmar reunião</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </section>
+
   <!-- CTA -->
   <section class="cta-section cta-section--black reveal">
     <p class="cta-section__subtitle" style="color: rgba(255,255,255,0.7);">Mal Podemos Esperar Para Ouvir de Você</p>

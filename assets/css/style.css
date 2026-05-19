@@ -395,6 +395,147 @@ body.no-scroll { overflow: hidden !important; }
   }
 }
 
+/* ===== SCHEDULER (CONTACT) ===== */
+.schedule-section {
+  padding: 90px 0;
+  background:
+    radial-gradient(circle at 15% 20%, rgba(201,184,160,0.16), transparent 40%),
+    radial-gradient(circle at 85% 80%, rgba(28,28,28,0.08), transparent 35%),
+    #f8f5f0;
+}
+
+.schedule-section__inner {
+  max-width: var(--container);
+  margin: 0 auto;
+  padding: 0 40px;
+}
+
+.schedule-section__title {
+  font-size: clamp(2.2rem, 5vw, 3.2rem);
+  color: var(--black);
+  margin-bottom: 12px;
+}
+
+.schedule-section__text {
+  color: #3e3a35;
+  max-width: 680px;
+  margin-bottom: 28px;
+}
+
+.schedule-card {
+  background: #ffffff;
+  border: 1px solid rgba(0,0,0,0.08);
+  box-shadow: 0 14px 40px rgba(0,0,0,0.08);
+  padding: 26px;
+}
+
+.schedule-controls {
+  display: flex;
+  gap: 16px;
+  align-items: end;
+  flex-wrap: wrap;
+}
+
+.schedule-field {
+  min-width: 240px;
+  flex: 1;
+}
+
+.schedule-field label {
+  display: block;
+  margin-bottom: 8px;
+  font-size: 0.74rem;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: #5a544d;
+}
+
+.schedule-field input {
+  width: 100%;
+  border: 1px solid #d7d0c6;
+  padding: 12px 14px;
+  background: #fff;
+}
+
+.schedule-status {
+  margin: 18px 0 12px;
+  font-size: 0.92rem;
+}
+
+.schedule-status--success { color: #0d6b3d; }
+.schedule-status--error { color: #b3261e; }
+.schedule-status--warning { color: #8a5a00; }
+.schedule-status--info { color: #3f3f3f; }
+
+.schedule-slots {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
+  gap: 10px;
+}
+
+.schedule-slot-btn {
+  border: 1px solid #d2c6b6;
+  background: #fff;
+  color: #2c2a28;
+  padding: 12px;
+  font-size: 0.82rem;
+  letter-spacing: 0.06em;
+  transition: all 0.25s ease;
+}
+
+.schedule-slot-btn:hover {
+  border-color: #a28f74;
+  transform: translateY(-1px);
+}
+
+.schedule-slot-btn--active {
+  background: #1a1a1a;
+  border-color: #1a1a1a;
+  color: #fff;
+}
+
+.schedule-booking {
+  margin-top: 22px;
+  border-top: 1px solid #ece4d9;
+  padding-top: 20px;
+}
+
+.schedule-booking h3 {
+  font-size: 1.3rem;
+  margin-bottom: 12px;
+}
+
+.schedule-booking__footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.schedule-booking__footer p {
+  color: #4e4a44;
+}
+
+@media (max-width: 768px) {
+  .schedule-section {
+    padding: 70px 0;
+  }
+
+  .schedule-section__inner {
+    padding: 0 20px;
+  }
+
+  .schedule-card {
+    padding: 18px;
+  }
+
+  .schedule-booking__footer {
+    flex-direction: column;
+    align-items: stretch;
+  }
+}
+
 /* ===== HERO SECTION (full-screen, dark) ===== */
 .hero {
   position: relative;

@@ -217,6 +217,144 @@
     }
   }
 
+  /* ---- Meeting Scheduler (Google Calendar) ---- */
+  var scheduler = document.getElementById('meetingScheduler');
+  if (scheduler) {
+    var dateInput = document.getElementById('meeting-date');
+    var loadSlotsBtn = document.getElementById('load-slots-btn');
+    var slotsContainer = document.getElementById('schedule-slots');
+    var statusEl = document.getElementById('schedule-status');
+    var bookingForm = document.getElementById('meeting-booking-form');
+    var selectedDateInput = document.getElementById('meeting-slot-date');
+    var selectedStartInput = document.getElementById('meeting-slot-start');
+    var selectedSlotText = document.getElementById('meeting-slot-selected');
+    var currentSelectedBtn = null;
+
+    var today = new Date();
+    var yyyy = today.getFullYear();
+    var mm = String(today.getMonth() + 1).padStart(2, '0');
+    var dd = String(today.getDate()).padStart(2, '0');
+    dateInput.min = yyyy + '-' + mm + '-' + dd;
+    dateInput.value = dateInput.value || dateInput.min;
+
+    function setStatus(message, type) {
+      statusEl.className = 'schedule-status schedule-status--' + (type || 'info');
+      statusEl.textContent = message;
+    }
+
+    function clearSlots() {
+      slotsContainer.innerHTML = '';
+      bookingForm.style.display = 'none';
+      currentSelectedBtn = null;
+      selectedDateInput.value = '';
+      selectedStartInput.value = '';
+      selectedSlotText.textContent = '';
+    }
+
+    function renderSlots(date, slots) {
+      clearSlots();
+
+      if (!slots || !slots.length) {
+        setStatus('Não encontramos horários livres nesta data. Tente outro dia.', 'warning');
+        return;
+      }
+
+      setStatus('Selecione um horário disponível para continuar.', 'success');
+
+      for (var i = 0; i < slots.length; i++) {
+        var slot = slots[i];
+        var btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'schedule-slot-btn';
+        btn.textContent = slot.label;
+        btn.setAttribute('data-start', slot.start);
+        btn.addEventListener('click', function () {
+          if (currentSelectedBtn) currentSelectedBtn.classList.remove('schedule-slot-btn--active');
+          this.classList.add('schedule-slot-btn--active');
+          currentSelectedBtn = this;
+
+          selectedDateInput.value = date;
+          selectedStartInput.value = this.getAttribute('data-start');
+          selectedSlotText.textContent = 'Horário selecionado: ' + date + ' às ' + this.getAttribute('data-start');
+          bookingForm.style.display = 'block';
+        });
+        slotsContainer.appendChild(btn);
+      }
+    }
+
+    function fetchSlots() {
+      var date = dateInput.value;
+      if (!date) {
+        setStatus('Selecione uma data válida.', 'error');
+        return;
+      }
+
+      setStatus('Consultando agenda...', 'info');
+      clearSlots();
+
+      fetch('/api/schedule?date=' + encodeURIComponent(date), {
+        method: 'GET',
+        headers: { 'Accept': 'application/json' }
+      })
+        .then(function (res) { return res.json(); })
+        .then(function (result) {
+          if (!result.success) {
+            setStatus(result.message || 'Não foi possível carregar os horários.', 'error');
+            return;
+          }
+          renderSlots(date, (result.data && result.data.slots) || []);
+        })
+        .catch(function () {
+          setStatus('Erro de conexão ao carregar agenda.', 'error');
+        });
+    }
+
+    loadSlotsBtn.addEventListener('click', fetchSlots);
+
+    bookingForm.addEventListener('submit', function (e) {
+      e.preventDefault();
+
+      var payload = {
+        name: (document.getElementById('meeting-name').value || '').trim(),
+        email: (document.getElementById('meeting-email').value || '').trim(),
+        notes: (document.getElementById('meeting-notes').value || '').trim(),
+        date: selectedDateInput.value,
+        start_time: selectedStartInput.value
+      };
+
+      if (!payload.date || !payload.start_time) {
+        setStatus('Selecione um horário antes de confirmar.', 'error');
+        return;
+      }
+
+      setStatus('Confirmando reunião...', 'info');
+
+      fetch('/api/schedule', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        },
+        body: JSON.stringify(payload)
+      })
+        .then(function (res) { return res.json(); })
+        .then(function (result) {
+          if (!result.success) {
+            setStatus(result.message || 'Não foi possível concluir o agendamento.', 'error');
+            return;
+          }
+
+          setStatus('Reunião agendada com sucesso! Você receberá confirmação por e-mail.', 'success');
+          bookingForm.reset();
+          clearSlots();
+          fetchSlots();
+        })
+        .catch(function () {
+          setStatus('Erro de conexão ao salvar agendamento.', 'error');
+        });
+    });
+  }
+
   /* ---- Contact Form Submission ---- */
   var contactForms = document.querySelectorAll('.contact-form__form');
   for (var i = 0; i < contactForms.length; i++) {
