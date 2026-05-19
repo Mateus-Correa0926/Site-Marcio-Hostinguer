@@ -225,175 +225,274 @@
     var slotsContainer = document.getElementById('schedule-slots');
     var statusEl = document.getElementById('schedule-status');
     var bookingForm = document.getElementById('meeting-booking-form');
-    var selectedDateInput = document.getElementById('meeting-slot-date');
-    var selectedStartInput = document.getElementById('meeting-slot-start');
-    var selectedSlotText = document.getElementById('meeting-slot-selected');
-    var currentSelectedBtn = null;
+    /* ---- Meeting Scheduler — Visual Calendar ---- */
+    var schedulerSection = document.getElementById('meetingScheduler');
+    if (schedulerSection) {
+      var calDaysEl      = document.getElementById('cal-days');
+      var calMonthLabel  = document.getElementById('cal-month-label');
+      var calPrev        = document.getElementById('cal-prev');
+      var calNext        = document.getElementById('cal-next');
+      var slotsContainer = document.getElementById('schedule-slots');
+      var slotsHint      = document.getElementById('schedule-slots-hint');
+      var statusEl       = document.getElementById('schedule-status');
+      var bookingForm    = document.getElementById('meeting-booking-form');
+      var selectedDateInput  = document.getElementById('meeting-slot-date');
+      var selectedStartInput = document.getElementById('meeting-slot-start');
+      var selectedSlotText   = document.getElementById('meeting-slot-selected');
 
-    var today = new Date();
-    var yyyy = today.getFullYear();
-    var mm = String(today.getMonth() + 1).padStart(2, '0');
-    var dd = String(today.getDate()).padStart(2, '0');
-    dateInput.min = yyyy + '-' + mm + '-' + dd;
-    dateInput.value = dateInput.value || dateInput.min;
+      var today         = new Date();
+      var currentYear   = today.getFullYear();
+      var currentMonth  = today.getMonth(); // 0-based
+      var selectedDay   = null;
+      var currentSelectedSlotBtn = null;
 
-    function setStatus(message, type) {
-      statusEl.className = 'schedule-status schedule-status--' + (type || 'info');
-      statusEl.textContent = message;
-    }
-
-    function clearSlots() {
-      slotsContainer.innerHTML = '';
-      bookingForm.style.display = 'none';
-      currentSelectedBtn = null;
-      selectedDateInput.value = '';
-      selectedStartInput.value = '';
-      selectedSlotText.textContent = '';
-    }
-
-    function renderSlots(date, slots) {
-      clearSlots();
-
-      if (!slots || !slots.length) {
-        setStatus('Não encontramos horários livres nesta data. Tente outro dia.', 'warning');
-        return;
-      }
-
-      setStatus('Selecione um horário disponível para continuar.', 'success');
-
-      for (var i = 0; i < slots.length; i++) {
-        var slot = slots[i];
-        var btn = document.createElement('button');
-        btn.type = 'button';
-        btn.className = 'schedule-slot-btn';
-        btn.textContent = slot.label;
-        btn.setAttribute('data-start', slot.start);
-        btn.addEventListener('click', function () {
-          if (currentSelectedBtn) currentSelectedBtn.classList.remove('schedule-slot-btn--active');
-          this.classList.add('schedule-slot-btn--active');
-          currentSelectedBtn = this;
-
-          selectedDateInput.value = date;
-          selectedStartInput.value = this.getAttribute('data-start');
-          selectedSlotText.textContent = 'Horário selecionado: ' + date + ' às ' + this.getAttribute('data-start');
-          bookingForm.style.display = 'block';
-        });
-        slotsContainer.appendChild(btn);
-      }
-    }
-
-    function fetchSlots() {
-      var date = dateInput.value;
-      if (!date) {
-        setStatus('Selecione uma data válida.', 'error');
-        return;
-      }
-
-      setStatus('Consultando agenda...', 'info');
-      clearSlots();
-
-      fetch('/api/schedule?date=' + encodeURIComponent(date), {
-        method: 'GET',
-        headers: { 'Accept': 'application/json' }
-      })
-        .then(function (res) { return res.json(); })
-        .then(function (result) {
-          if (!result.success) {
-            setStatus(result.message || 'Não foi possível carregar os horários.', 'error');
-            return;
-          }
-          renderSlots(date, (result.data && result.data.slots) || []);
-        })
-        .catch(function () {
-          setStatus('Erro de conexão ao carregar agenda.', 'error');
-        });
-    }
-
-    loadSlotsBtn.addEventListener('click', fetchSlots);
-
-    bookingForm.addEventListener('submit', function (e) {
-      e.preventDefault();
-
-      var payload = {
-        name: (document.getElementById('meeting-name').value || '').trim(),
-        email: (document.getElementById('meeting-email').value || '').trim(),
-        notes: (document.getElementById('meeting-notes').value || '').trim(),
-        date: selectedDateInput.value,
-        start_time: selectedStartInput.value
-      };
-
-      if (!payload.date || !payload.start_time) {
-        setStatus('Selecione um horário antes de confirmar.', 'error');
-        return;
-      }
-
-      setStatus('Confirmando reunião...', 'info');
-
-      fetch('/api/schedule', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'application/json'
-        },
-        body: JSON.stringify(payload)
-      })
-        .then(function (res) { return res.json(); })
-        .then(function (result) {
-          if (!result.success) {
-            setStatus(result.message || 'Não foi possível concluir o agendamento.', 'error');
-            return;
-          }
-
-          setStatus('Reunião agendada com sucesso! Você receberá confirmação por e-mail.', 'success');
-          bookingForm.reset();
-          clearSlots();
-          fetchSlots();
-        })
-        .catch(function () {
-          setStatus('Erro de conexão ao salvar agendamento.', 'error');
-        });
-    });
-  }
-
-  /* ---- Contact Form Submission ---- */
-  var contactForms = document.querySelectorAll('.contact-form__form');
-  for (var i = 0; i < contactForms.length; i++) {
-    contactForms[i].addEventListener('submit', function (e) {
-      e.preventDefault();
-      var form = this;
-      var formData = new FormData(form);
+      // Disponibilidade por mês: cache para não recarregar o mesmo mês
+      var availabilityCache = {};
       var data = {};
+      var MONTHS_PT = [
+        'Janeiro','Fevereiro','Março','Abril','Maio','Junho',
+        'Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'
+      ];
       formData.forEach(function (value, key) {
+      // ---- Helpers ----
+      function pad(n) { return n < 10 ? '0' + n : '' + n; }
+
+      function dateStr(y, m, d) { return y + '-' + pad(m + 1) + '-' + pad(d); }
+
+      function setStatus(msg, type) {
+        statusEl.className = 'schedule-status schedule-status--' + (type || 'info');
+        statusEl.textContent = msg;
+      }
+
+      function clearSlots() {
+        slotsContainer.innerHTML = '';
+        bookingForm.style.display = 'none';
+        currentSelectedSlotBtn = null;
+        selectedDateInput.value = '';
+        selectedStartInput.value = '';
+        selectedSlotText.textContent = '';
+        slotsHint.textContent = 'Selecione uma data para ver os horários.';
+        slotsHint.style.display = '';
+      }
+
+      // ---- Calendário ----
+      function renderCalendar(year, month, availability) {
+        calDaysEl.innerHTML = '';
+        calMonthLabel.textContent = MONTHS_PT[month] + ' ' + year;
         data[key] = value;
+        var firstWeekday = new Date(year, month, 1).getDay(); // 0=Dom
+        var daysInMonth  = new Date(year, month + 1, 0).getDate();
+        var todayStr     = dateStr(today.getFullYear(), today.getMonth(), today.getDate());
       });
+        // Células vazias antes do dia 1
+        for (var e = 0; e < firstWeekday; e++) {
+          var empty = document.createElement('span');
+          empty.className = 'schedule-day schedule-day--empty';
+          calDaysEl.appendChild(empty);
+        }
 
+        for (var d = 1; d <= daysInMonth; d++) {
+          var ds      = dateStr(year, month, d);
+          var dayDate = new Date(year, month, d);
+          var wd      = dayDate.getDay(); // 0=Dom, 6=Sab
+          var btn     = document.createElement('button');
+          btn.type    = 'button';
+          btn.textContent = d;
+          btn.setAttribute('data-date', ds);
       fetch('/api/contact', {
+          var classes = ['schedule-day'];
         method: 'POST',
+          if (ds === todayStr) classes.push('schedule-day--today');
+          if (ds === selectedDay) classes.push('schedule-day--selected');
         headers: { 'Content-Type': 'application/json' },
+          var isPast    = ds < todayStr;
+          var isWeekend = wd === 0 || wd === 6;
+          var isUnavail = availability && availability.unavailable && availability.unavailable.indexOf(ds) !== -1;
+          var isAvail   = availability && availability.available   && availability.available.indexOf(ds)   !== -1;
         body: JSON.stringify(data)
-      })
-        .then(function (res) { return res.json(); })
-        .then(function (result) {
-          if (result.success) {
-            form.reset();
-            showFormMessage(form, 'Obrigado! Entraremos em contato em breve.', 'success');
+          if (isPast || isWeekend) {
+            classes.push('schedule-day--past');
+            btn.disabled = true;
+          } else if (isUnavail) {
+            classes.push('schedule-day--unavailable');
+            btn.disabled = true;
+          } else if (isAvail) {
+            classes.push('schedule-day--available');
           } else {
-            showFormMessage(form, result.message || 'Algo deu errado. Tente novamente.', 'error');
+            // Disponibilidade ainda carregando
+            classes.push('schedule-day--loading');
           }
+      })
+          btn.className = classes.join(' ');
+        .then(function (res) { return res.json(); })
+          if (!btn.disabled) {
+            btn.addEventListener('click', function () {
+              var prev = calDaysEl.querySelector('.schedule-day--selected');
+              if (prev) prev.classList.remove('schedule-day--selected');
+              this.classList.add('schedule-day--selected');
+              selectedDay = this.getAttribute('data-date');
+              fetchSlots(selectedDay);
+            });
+          }
+        .then(function (result) {
+          calDaysEl.appendChild(btn);
+        }
+      }
+          if (result.success) {
+      function fetchMonthAvailability(year, month) {
+        var key = year + '-' + pad(month + 1);
+        if (availabilityCache[key] !== undefined) {
+          renderCalendar(year, month, availabilityCache[key]);
+          return;
+        }
+            form.reset();
+        // Renderiza sem disponibilidade enquanto carrega
+        renderCalendar(year, month, null);
+            showFormMessage(form, 'Obrigado! Entraremos em contato em breve.', 'success');
+        fetch('/api/schedule?month=' + encodeURIComponent(key), {
+          method: 'GET',
+          headers: { 'Accept': 'application/json' }
         })
+          .then(function (res) { return res.json(); })
+          .then(function (result) {
+            if (result.success && result.data) {
+              availabilityCache[key] = result.data;
+              renderCalendar(year, month, result.data);
+            }
+          })
+          .catch(function () { /* falha silenciosa — calendário continua usável */ });
+      }
+          } else {
+      // ---- Horários ----
+      function renderSlots(date, slots) {
+        slotsContainer.innerHTML = '';
+        currentSelectedSlotBtn = null;
+            showFormMessage(form, result.message || 'Algo deu errado. Tente novamente.', 'error');
+        if (!slots || !slots.length) {
+          slotsHint.textContent = 'Sem horários disponíveis nesta data.';
+          slotsHint.style.display = '';
+          return;
+        }
+          }
+        slotsHint.style.display = 'none';
+        })
+        for (var i = 0; i < slots.length; i++) {
+          (function (slot) {
+            var btn = document.createElement('button');
+            btn.type = 'button';
+            btn.className = 'schedule-slot-btn';
+            btn.textContent = slot.start;
+            btn.setAttribute('data-start', slot.start);
+            btn.addEventListener('click', function () {
+              if (currentSelectedSlotBtn) currentSelectedSlotBtn.classList.remove('schedule-slot-btn--active');
+              this.classList.add('schedule-slot-btn--active');
+              currentSelectedSlotBtn = this;
         .catch(function () {
+              selectedDateInput.value  = date;
+              selectedStartInput.value = slot.start;
           showFormMessage(form, 'Erro de conexão. Tente novamente mais tarde.', 'error');
+              // Formata a data para exibição
+              var parts = date.split('-');
+              var d = new Date(parseInt(parts[0]), parseInt(parts[1]) - 1, parseInt(parts[2]));
+              var weekdays = ['domingo','segunda-feira','terça-feira','quarta-feira','quinta-feira','sexta-feira','sábado'];
+              var months   = ['janeiro','fevereiro','março','abril','maio','junho','julho','agosto','setembro','outubro','novembro','dezembro'];
+              selectedSlotText.textContent =
+                weekdays[d.getDay()] + ', ' + d.getDate() + ' de ' + months[d.getMonth()] + ' às ' + slot.start;
         });
+              bookingForm.style.display = 'block';
+              bookingForm.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            });
+            slotsContainer.appendChild(btn);
+          })(slots[i]);
+        }
+      }
     });
+      function fetchSlots(date) {
+        clearSlots();
+        slotsHint.textContent = 'Consultando agenda…';
+        slotsHint.style.display = '';
   }
+        fetch('/api/schedule?date=' + encodeURIComponent(date), {
+          method: 'GET',
+          headers: { 'Accept': 'application/json' }
+        })
+          .then(function (res) { return res.json(); })
+          .then(function (result) {
+            if (!result.success) {
+              slotsHint.textContent = result.message || 'Não foi possível carregar os horários.';
+              return;
+            }
+            renderSlots(date, (result.data && result.data.slots) || []);
+          })
+          .catch(function () {
+            slotsHint.textContent = 'Erro de conexão. Tente novamente.';
+          });
+      }
 
+      // ---- Navegação de mês ----
+      calPrev.addEventListener('click', function () {
+        currentMonth--;
+        if (currentMonth < 0) { currentMonth = 11; currentYear--; }
+        clearSlots();
+        selectedDay = null;
+        fetchMonthAvailability(currentYear, currentMonth);
+      });
   function showFormMessage(form, message, type) {
+      calNext.addEventListener('click', function () {
+        currentMonth++;
+        if (currentMonth > 11) { currentMonth = 0; currentYear++; }
+        clearSlots();
+        selectedDay = null;
+        fetchMonthAvailability(currentYear, currentMonth);
+      });
     // Remove existing
+      // ---- Formulário de confirmação ----
+      bookingForm.addEventListener('submit', function (e) {
+        e.preventDefault();
     var existing = form.querySelector('.form-message');
+        var payload = {
+          name:       (document.getElementById('meeting-name').value  || '').trim(),
+          email:      (document.getElementById('meeting-email').value || '').trim(),
+          notes:      (document.getElementById('meeting-notes').value || '').trim(),
+          date:       selectedDateInput.value,
+          start_time: selectedStartInput.value
+        };
     if (existing) existing.remove();
+        if (!payload.date || !payload.start_time) {
+          setStatus('Selecione um horário antes de confirmar.', 'error');
+          return;
+        }
 
+        setStatus('Confirmando reunião…', 'info');
     var el = document.createElement('p');
+        fetch('/api/schedule', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+          body: JSON.stringify(payload)
+        })
+          .then(function (res) { return res.json(); })
+          .then(function (result) {
+            if (!result.success) {
+              setStatus(result.message || 'Não foi possível concluir o agendamento.', 'error');
+              return;
+            }
+            setStatus('Reunião agendada! Você receberá confirmação por e-mail.', 'success');
+            bookingForm.reset();
+            bookingForm.style.display = 'none';
+            // Invalida cache do mês para refletir novo bloqueio
+            var key = currentYear + '-' + pad(currentMonth + 1);
+            delete availabilityCache[key];
+            selectedDay = null;
+            fetchMonthAvailability(currentYear, currentMonth);
+          })
+          .catch(function () {
+            setStatus('Erro de conexão ao salvar agendamento.', 'error');
+          });
+      });
     el.className = 'form-message form-message--' + type;
+      // ---- Init ----
+      fetchMonthAvailability(currentYear, currentMonth);
+    }
     el.textContent = message;
     form.appendChild(el);
 

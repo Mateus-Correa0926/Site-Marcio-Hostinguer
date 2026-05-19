@@ -8,7 +8,12 @@
 function handleSchedule($method, $id, $action, $currentUser) {
     switch ($method) {
         case 'GET':
-            getAvailableSlots();
+            $month = getQueryParam('month');
+            if ($month) {
+                getMonthAvailability($month);
+            } else {
+                getAvailableSlots();
+            }
             break;
         case 'POST':
             bookMeeting();
@@ -16,6 +21,55 @@ function handleSchedule($method, $id, $action, $currentUser) {
         default:
             errorResponse('Método não permitido', 405);
     }
+}
+
+
+function getMonthAvailability($month) {
+    ensureGoogleCalendarEnabled();
+
+    if (!$month || !preg_match('/^\d{4}-\d{2}$/', $month)) {
+        errorResponse('Mês inválido. Use YYYY-MM.', 422);
+    }
+
+    $timezone = new DateTimeZone(GOOGLE_CALENDAR_TIMEZONE);
+    $firstDay = new DateTime($month . '-01 00:00:00', $timezone);
+    $lastDay  = new DateTime($firstDay->format('Y-m-t') . ' 23:59:59', $timezone);
+
+    // Consulta o Google Calendar uma só vez para o mês inteiro
+    $busyRanges = googleCalendarGetBusyRanges($firstDay, $lastDay);
+
+    $today = new DateTime('today', $timezone);
+    $available = [];
+    $unavailable = [];
+
+    $cursor = clone $firstDay;
+    while ($cursor <= $lastDay) {
+        $dateStr = $cursor->format('Y-m-d');
+        $weekday = (int)$cursor->format('N'); // 1=Mon, 7=Sun
+
+        // Fim de semana ou dia no passado
+        if ($weekday >= 6 || $cursor < $today) {
+            $unavailable[] = $dateStr;
+            $cursor->modify('+1 day');
+            continue;
+        }
+
+        // Verifica se há pelo menos um slot livre no dia
+        $slots = buildDaySlots($dateStr, $busyRanges, $timezone);
+        if (count($slots) > 0) {
+            $available[] = $dateStr;
+        } else {
+            $unavailable[] = $dateStr;
+        }
+
+        $cursor->modify('+1 day');
+    }
+
+    successResponse([
+        'month'       => $month,
+        'available'   => $available,
+        'unavailable' => $unavailable
+    ]);
 }
 
 function getAvailableSlots() {
