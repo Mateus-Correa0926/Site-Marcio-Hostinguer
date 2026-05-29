@@ -709,6 +709,94 @@ body.no-scroll { overflow: hidden !important; }
   }
 }
 
+/* ---- Scheduler light variant (agenda.html) ---- */
+.schedule-light .schedule-hero {
+  background: var(--bone);
+  border-bottom: 1px solid rgba(0,0,0,0.08);
+}
+
+.schedule-light .schedule-hero .contact-hero__label,
+.schedule-light .schedule-hero .contact-hero__title,
+.schedule-light .schedule-hero .contact-hero__text {
+  color: var(--dark);
+}
+
+.schedule-light .schedule-hero .contact-hero__label {
+  opacity: 0.65;
+}
+
+.schedule-light .schedule-section {
+  background: var(--cream);
+}
+
+.schedule-light .schedule-widget,
+.schedule-light .schedule-booking,
+.schedule-light .schedule-confirmation {
+  background: #ffffff;
+}
+
+.schedule-light .schedule-divider {
+  background: rgba(0,0,0,0.12);
+}
+
+.schedule-light .schedule-slots-panel {
+  max-height: none;
+  overflow: visible;
+  padding: 28px 14px 20px;
+}
+
+.schedule-light .schedule-slots {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(86px, 1fr));
+  gap: 8px;
+}
+
+.schedule-light .schedule-slot-btn {
+  font-size: 0.58rem;
+  letter-spacing: 0.12em;
+  padding: 10px 6px;
+}
+
+.schedule-light .schedule-slot-btn--active {
+  background: var(--dark);
+  color: var(--white);
+  border-color: var(--dark);
+}
+
+.schedule-light .schedule-confirmation {
+  border-top: 1px solid rgba(0,0,0,0.1);
+}
+
+.schedule-light .schedule-confirmation__text {
+  color: var(--dark);
+}
+
+.schedule-light .schedule-integration-note {
+  color: rgba(0,0,0,0.6);
+}
+
+@media (max-width: 960px) {
+  .schedule-light .schedule-slots {
+    grid-template-columns: repeat(3, minmax(84px, 1fr));
+  }
+}
+
+@media (max-width: 820px) {
+  .schedule-light .schedule-slots-panel {
+    padding: 20px 16px;
+  }
+
+  .schedule-light .schedule-slots {
+    grid-template-columns: repeat(2, minmax(92px, 1fr));
+  }
+}
+
+@media (max-width: 460px) {
+  .schedule-light .schedule-slots {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
 /* ---- Painel de horários ---- */
 .schedule-slots-panel {
   padding: 32px 20px 24px;
