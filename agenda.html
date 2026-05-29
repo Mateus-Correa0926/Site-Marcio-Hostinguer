@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="description" content="Agenda — Escolha o melhor dia e horário para marcar uma reunião com a Stornoway Films." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=Great+Vibes&family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <title>Agenda — Stornoway Films</title>
+  <link rel="stylesheet" href="/assets/css/style.css?v=20260529a" />
+</head>
+<body class="schedule-page">
+
+  <nav class="nav nav--transparent" id="navbar">
+    <a href="/" class="nav__logo"><img src="/uploads/images/logo-transparente.png" alt="Stornoway Films" class="nav__logo-img" /></a>
+    <div class="nav__links">
+      <a href="/" class="nav__link">Início</a>
+      <a href="/about.html" class="nav__link">Sobre</a>
+      <a href="/experience.html" class="nav__link">Experiência</a>
+      <a href="/films.html" class="nav__link">Filmes</a>
+      <a href="/featured-films.html" class="nav__link">Destaques</a>
+      <a href="/contact.html" class="nav__link">Contato</a>
+      <a href="/agenda.html" class="nav__link nav__link--active">Agenda</a>
+      <a href="https://www.instagram.com/stornowayfilms/" target="_blank" rel="noopener" class="nav__social" aria-label="Instagram">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="5"/><circle cx="17.5" cy="6.5" r="1.5" fill="currentColor" stroke="none"/></svg>
+      </a>
+    </div>
+    <button class="nav__hamburger" id="hamburger" aria-label="Menu"><span></span><span></span><span></span></button>
+  </nav>
+
+  <div class="nav__mobile" id="mobileMenu">
+    <a href="/" class="nav__mobile-link">Início</a>
+    <a href="/about.html" class="nav__mobile-link">Sobre</a>
+    <a href="/experience.html" class="nav__mobile-link">Experiência</a>
+    <a href="/films.html" class="nav__mobile-link">Filmes</a>
+    <a href="/featured-films.html" class="nav__mobile-link">Destaques</a>
+    <a href="/contact.html" class="nav__mobile-link">Contato</a>
+    <a href="/agenda.html" class="nav__mobile-link">Agenda</a>
+  </div>
+
+  <section class="contact-hero">
+    <p class="contact-hero__label">Agendamento</p>
+    <h1 class="contact-hero__title">Escolha o Melhor Dia e<br>Hora Para Conversarmos</h1>
+    <p class="contact-hero__text">
+      Veja os horários disponíveis, selecione seu slot e confirme uma reunião com o administrador.
+      Você pode escrever o assunto do encontro e recebe confirmação em seguida.
+    </p>
+  </section>
+
+  <section class="schedule-section schedule-section--dark reveal" id="meetingScheduler">
+    <div class="schedule-section__inner">
+      <span class="section-label section-label--light">Calendário</span>
+      <h2 class="schedule-section__title">Agende Sua <em>Reunião</em></h2>
+      <p class="schedule-section__text">Selecione uma data disponível no calendário e escolha o horário ideal.</p>
+
+      <div class="schedule-widget">
+        <div class="schedule-cal">
+          <div class="schedule-cal__nav">
+            <button type="button" class="schedule-cal__arrow" id="cal-prev" aria-label="Mês anterior">&#8249;</button>
+            <span class="schedule-cal__month-label" id="cal-month-label"></span>
+            <button type="button" class="schedule-cal__arrow" id="cal-next" aria-label="Próximo mês">&#8250;</button>
+          </div>
+          <div class="schedule-cal__weekdays" aria-hidden="true">
+            <span>Dom</span><span>Seg</span><span>Ter</span><span>Qua</span><span>Qui</span><span>Sex</span><span>Sáb</span>
+          </div>
+          <div class="schedule-cal__days" id="cal-days"></div>
+          <div class="schedule-status" id="schedule-status" aria-live="polite"></div>
+        </div>
+
+        <div class="schedule-divider" aria-hidden="true"></div>
+
+        <div class="schedule-slots-panel" id="schedule-slots-panel">
+          <p class="schedule-slots-panel__hint" id="schedule-slots-hint">Selecione uma data para ver os horários.</p>
+          <div class="schedule-slots" id="schedule-slots"></div>
+        </div>
+      </div>
+
+      <form class="schedule-booking" id="meeting-booking-form" style="display:none;" novalidate>
+        <div class="schedule-booking__header">
+          <span class="section-label section-label--dark">Confirmar Horário</span>
+          <p class="schedule-selected-text" id="meeting-slot-selected"></p>
+        </div>
+        <div class="form-row">
+          <div class="form-field">
+            <label for="meeting-name">Nome</label>
+            <input type="text" id="meeting-name" name="name" required autocomplete="name" />
+          </div>
+          <div class="form-field">
+            <label for="meeting-email">E-mail</label>
+            <input type="email" id="meeting-email" name="email" required autocomplete="email" />
+          </div>
+        </div>
+        <div class="form-field">
+          <label for="meeting-subject">Assunto da Reunião</label>
+          <input type="text" id="meeting-subject" name="subject" required maxlength="120" placeholder="Ex: Alinhamento do roteiro do casamento" />
+        </div>
+        <div class="form-field">
+          <label for="meeting-notes">Observações (opcional)</label>
+          <textarea id="meeting-notes" name="notes" rows="3" placeholder="Pontos que você gostaria de discutir."></textarea>
+        </div>
+        <input type="hidden" id="meeting-slot-date" name="date" />
+        <input type="hidden" id="meeting-slot-start" name="start_time" />
+        <div class="form-submit">
+          <button type="submit" class="btn btn--solid-dark">Confirmar Reunião</button>
+        </div>
+      </form>
+
+      <div class="schedule-confirmation" id="schedule-confirmation" style="display:none;">
+        <p class="schedule-confirmation__text" id="schedule-confirmation-text"></p>
+        <button type="button" class="btn btn--outline-white" id="schedule-confirmation-continue">Continuar</button>
+      </div>
+
+      <p class="schedule-integration-note" id="schedule-integration-note">
+        Integração automática com Google Calendar quando configurado. Se não estiver ativo, o agendamento é salvo no calendário administrativo interno.
+      </p>
+    </div>
+  </section>
+
+  <section class="image-banner">
+    <img src="https://images.unsplash.com/photo-1519741497674-611481863552?w=400&q=80" alt="Casal em cerimônia" loading="lazy" />
+    <img src="https://images.unsplash.com/photo-1583939003579-730e3918a45a?w=400&q=80" alt="Noivos caminhando" loading="lazy" />
+    <img src="https://images.unsplash.com/photo-1606216794074-735e91aa2c92?w=400&q=80" alt="Detalhes de casamento" loading="lazy" />
+    <img src="https://images.unsplash.com/photo-1465495976277-4387d4b0b4c6?w=400&q=80" alt="Comemoração ao pôr do sol" loading="lazy" />
+  </section>
+
+  <footer class="footer">
+    <img src="/uploads/images/logo-transparente.png" alt="Stornoway Films" class="footer__logo-img" />
+    <p class="footer__tagline" data-cms="footer_tagline">Cinematografia de Casamentos</p>
+    <p class="footer__desc" data-cms="footer_description">Uma produtora internacional de filmes de casamento de luxo, construindo uma comunidade de aprendizado e inspiração para cineastas.</p>
+    <nav class="footer__nav">
+      <a href="/" class="footer__link">Início</a>
+      <a href="/about.html" class="footer__link">Sobre</a>
+      <a href="/experience.html" class="footer__link">Experiência</a>
+      <a href="/films.html" class="footer__link">Filmes</a>
+      <a href="/featured-films.html" class="footer__link">Destaques</a>
+      <a href="/contact.html" class="footer__link">Contato</a>
+      <a href="/agenda.html" class="footer__link">Agenda</a>
+    </nav>
+    <div class="footer__social">
+      <a href="https://www.instagram.com/stornowayfilms/" target="_blank" rel="noopener" aria-label="Instagram">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="5"/><circle cx="17.5" cy="6.5" r="1.5" fill="currentColor" stroke="none"/></svg>
+      </a>
+      <a href="mailto:contact@stornowayfilms.com" aria-label="Email">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M22 7l-10 7L2 7"/></svg>
+      </a>
+    </div>
+    <div class="footer__bottom">
+      <p class="footer__copy">&copy; 2026 Stornoway Films. Todos os direitos reservados.</p>
+    </div>
+  </footer>
+
+  <script src="/assets/js/main.js?v=20260529a" defer></script>
+  <script src="/assets/js/scheduler-page.js?v=20260529a" defer></script>
+  <script src="/assets/js/cms.js?v=20260529a" defer></script>
+</body>
+</html>

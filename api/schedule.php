@@ -25,18 +25,16 @@ function handleSchedule($method, $id, $action, $currentUser) {
 
 
 function getMonthAvailability($month) {
-    ensureGoogleCalendarEnabled();
-
     if (!$month || !preg_match('/^\d{4}-\d{2}$/', $month)) {
         errorResponse('Mês inválido. Use YYYY-MM.', 422);
     }
 
+    $provider = getScheduleProvider();
     $timezone = new DateTimeZone(GOOGLE_CALENDAR_TIMEZONE);
     $firstDay = new DateTime($month . '-01 00:00:00', $timezone);
     $lastDay  = new DateTime($firstDay->format('Y-m-t') . ' 23:59:59', $timezone);
 
-    // Consulta o Google Calendar uma só vez para o mês inteiro
-    $busyRanges = googleCalendarGetBusyRanges($firstDay, $lastDay);
+    $busyRanges = getBusyRanges($provider, $firstDay, $lastDay);
 
     $today = new DateTime('today', $timezone);
     $available = [];
@@ -67,19 +65,19 @@ function getMonthAvailability($month) {
 
     successResponse([
         'month'       => $month,
+        'provider'    => $provider,
         'available'   => $available,
         'unavailable' => $unavailable
     ]);
 }
 
 function getAvailableSlots() {
-    ensureGoogleCalendarEnabled();
-
     $date = getQueryParam('date');
     if (!$date || !preg_match('/^\d{4}-\d{2}-\d{2}$/', $date)) {
         errorResponse('Data inválida. Use YYYY-MM-DD.', 422);
     }
 
+    $provider = getScheduleProvider();
     $timezone = new DateTimeZone(GOOGLE_CALENDAR_TIMEZONE);
     $dayStart = new DateTime($date . ' 00:00:00', $timezone);
     $dayEnd = new DateTime($date . ' 23:59:59', $timezone);
@@ -93,24 +91,25 @@ function getAvailableSlots() {
         ]);
     }
 
-    $busyRanges = googleCalendarGetBusyRanges($dayStart, $dayEnd);
+    $busyRanges = getBusyRanges($provider, $dayStart, $dayEnd);
     $slots = buildDaySlots($date, $busyRanges, $timezone);
 
     successResponse([
         'date' => $date,
+        'provider' => $provider,
         'timezone' => GOOGLE_CALENDAR_TIMEZONE,
         'slots' => $slots
     ]);
 }
 
 function bookMeeting() {
-    ensureGoogleCalendarEnabled();
-
     $data = getRequestBody();
-    validateRequired($data, ['name', 'email', 'date', 'start_time']);
+    validateRequired($data, ['name', 'email', 'date', 'start_time', 'subject']);
 
+    $provider = getScheduleProvider();
     $name = sanitizeString($data['name']);
     $email = filter_var($data['email'], FILTER_SANITIZE_EMAIL);
+    $subject = sanitizeString($data['subject']);
     $notes = sanitizeString($data['notes'] ?? '');
     $date = $data['date'];
     $startTime = $data['start_time'];
@@ -120,6 +119,9 @@ function bookMeeting() {
     }
     if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
         errorResponse('E-mail inválido', 422);
+    }
+    if (!$subject || mb_strlen($subject, 'UTF-8') < 3) {
+        errorResponse('Assunto inválido', 422);
     }
     if (!preg_match('/^\d{4}-\d{2}-\d{2}$/', $date)) {
         errorResponse('Data inválida. Use YYYY-MM-DD.', 422);
@@ -142,28 +144,42 @@ function bookMeeting() {
         errorResponse('Horário fora da agenda disponível.', 422);
     }
 
-    $busy = googleCalendarGetBusyRanges($start, $end);
+    $busy = getBusyRanges($provider, $start, $end);
     if (isRangeBusy($start, $end, $busy)) {
         errorResponse('Esse horário acabou de ser reservado. Escolha outro.', 409);
     }
 
-    $event = googleCalendarCreateEvent($start, $end, $name, $email, $notes);
+    $result = $provider === 'google'
+        ? googleCalendarCreateEvent($start, $end, $name, $email, $subject, $notes)
+        : createAdminCalendarBooking($start, $end, $name, $email, $subject, $notes);
 
     successResponse([
-        'event_id' => $event['id'] ?? null,
-        'html_link' => $event['htmlLink'] ?? null,
+        'provider' => $provider,
+        'event_id' => $result['id'] ?? null,
+        'html_link' => $result['htmlLink'] ?? null,
         'start' => $start->format(DateTime::ATOM),
         'end' => $end->format(DateTime::ATOM)
     ], 'Reunião agendada com sucesso!', 201);
 }
 
-function ensureGoogleCalendarEnabled() {
-    if (!GOOGLE_CALENDAR_ENABLED) {
-        errorResponse('Agenda indisponível no momento.', 503);
+function getScheduleProvider() {
+    if (
+        GOOGLE_CALENDAR_ENABLED &&
+        GOOGLE_CALENDAR_SERVICE_ACCOUNT_EMAIL &&
+        GOOGLE_CALENDAR_PRIVATE_KEY
+    ) {
+        return 'google';
     }
-    if (!GOOGLE_CALENDAR_SERVICE_ACCOUNT_EMAIL || !GOOGLE_CALENDAR_PRIVATE_KEY) {
-        errorResponse('Configuração do Google Calendar incompleta.', 500);
+
+    return 'admin';
+}
+
+function getBusyRanges($provider, DateTime $timeMin, DateTime $timeMax) {
+    if ($provider === 'google') {
+        return googleCalendarGetBusyRanges($timeMin, $timeMax);
     }
+
+    return adminCalendarGetBusyRanges($timeMin, $timeMax);
 }
 
 function buildDaySlots($date, $busyRanges, DateTimeZone $timezone) {
@@ -240,12 +256,12 @@ function googleCalendarGetBusyRanges(DateTime $timeMin, DateTime $timeMax) {
     return $ranges;
 }
 
-function googleCalendarCreateEvent(DateTime $start, DateTime $end, $name, $email, $notes) {
+function googleCalendarCreateEvent(DateTime $start, DateTime $end, $name, $email, $subject, $notes) {
     $token = googleCalendarGetAccessToken();
 
     $payload = [
-        'summary' => 'Reunião - ' . $name,
-        'description' => "Solicitante: {$name}\nE-mail: {$email}\n\nObservações:\n{$notes}",
+        'summary' => 'Reunião - ' . $subject,
+        'description' => "Solicitante: {$name}\nE-mail: {$email}\nAssunto: {$subject}\n\nObservações:\n{$notes}",
         'start' => [
             'dateTime' => $start->format(DateTime::RFC3339),
             'timeZone' => GOOGLE_CALENDAR_TIMEZONE
@@ -261,6 +277,96 @@ function googleCalendarCreateEvent(DateTime $start, DateTime $end, $name, $email
 
     $url = 'https://www.googleapis.com/calendar/v3/calendars/' . rawurlencode(GOOGLE_CALENDAR_CALENDAR_ID) . '/events?sendUpdates=all';
     return googleApiRequest($url, 'POST', $token, $payload);
+}
+
+function adminCalendarGetBusyRanges(DateTime $timeMin, DateTime $timeMax) {
+    $db = Database::getInstance()->getConnection();
+    ensureAdminMeetingTable($db);
+
+    $stmt = $db->prepare(
+        "SELECT start_at, end_at
+         FROM meeting_bookings
+         WHERE status = 'confirmed'
+           AND start_at < ?
+           AND end_at > ?"
+    );
+
+    $stmt->execute([
+        $timeMax->format('Y-m-d H:i:s'),
+        $timeMin->format('Y-m-d H:i:s')
+    ]);
+
+    $ranges = [];
+    foreach ($stmt->fetchAll() as $row) {
+        $ranges[] = [
+            'start' => new DateTime($row['start_at'], new DateTimeZone(GOOGLE_CALENDAR_TIMEZONE)),
+            'end' => new DateTime($row['end_at'], new DateTimeZone(GOOGLE_CALENDAR_TIMEZONE))
+        ];
+    }
+
+    return $ranges;
+}
+
+function createAdminCalendarBooking(DateTime $start, DateTime $end, $name, $email, $subject, $notes) {
+    $db = Database::getInstance()->getConnection();
+    ensureAdminMeetingTable($db);
+
+    $slotKey = $start->format('Y-m-d-H:i');
+
+    $stmt = $db->prepare(
+        "INSERT INTO meeting_bookings
+         (provider, slot_key, subject, requester_name, requester_email, notes, start_at, end_at, status)
+         VALUES ('admin', ?, ?, ?, ?, ?, ?, ?, 'confirmed')"
+    );
+
+    try {
+        $stmt->execute([
+            $slotKey,
+            $subject,
+            $name,
+            $email,
+            $notes,
+            $start->format('Y-m-d H:i:s'),
+            $end->format('Y-m-d H:i:s')
+        ]);
+    } catch (PDOException $e) {
+        if ((int)$e->getCode() === 23000) {
+            errorResponse('Esse horário acabou de ser reservado. Escolha outro.', 409);
+        }
+        throw $e;
+    }
+
+    return [
+        'id' => $db->lastInsertId(),
+        'htmlLink' => null
+    ];
+}
+
+function ensureAdminMeetingTable($db) {
+    static $checked = false;
+    if ($checked) return;
+
+    $db->exec(
+        "CREATE TABLE IF NOT EXISTS meeting_bookings (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            provider ENUM('admin','google') DEFAULT 'admin',
+            slot_key VARCHAR(64) NOT NULL UNIQUE,
+            subject VARCHAR(255) NOT NULL,
+            requester_name VARCHAR(255) NOT NULL,
+            requester_email VARCHAR(255) NOT NULL,
+            notes TEXT DEFAULT NULL,
+            start_at DATETIME NOT NULL,
+            end_at DATETIME NOT NULL,
+            external_event_id VARCHAR(255) DEFAULT NULL,
+            status ENUM('confirmed','cancelled') DEFAULT 'confirmed',
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+            INDEX idx_meeting_start (start_at),
+            INDEX idx_meeting_status (status)
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci"
+    );
+
+    $checked = true;
 }
 
 function googleCalendarGetAccessToken() {

@@ -590,6 +590,125 @@ body.no-scroll { overflow: hidden !important; }
 .schedule-status--warning { color: #7a5c2a; }
 .schedule-status--info    { color: rgba(0,0,0,0.45); }
 
+/* ---- Scheduler dark variant (agenda.html) ---- */
+.schedule-page .schedule-section--dark {
+  background: #080808;
+  border-top: 1px solid rgba(255,255,255,0.08);
+}
+
+.schedule-page .schedule-section__title,
+.schedule-page .schedule-section__text,
+.schedule-page .schedule-cal__month-label,
+.schedule-page .schedule-cal__arrow,
+.schedule-page .schedule-cal__weekdays span,
+.schedule-page .schedule-status,
+.schedule-page .schedule-slots-panel__hint,
+.schedule-page .schedule-integration-note {
+  color: rgba(255,255,255,0.78);
+}
+
+.schedule-page .schedule-widget,
+.schedule-page .schedule-booking {
+  background: #111111;
+  border-color: rgba(255,255,255,0.14);
+}
+
+.schedule-page .schedule-divider {
+  background: rgba(255,255,255,0.12);
+}
+
+.schedule-page .schedule-day {
+  color: #f1f1f1;
+}
+
+.schedule-page .schedule-day--available:hover {
+  background: rgba(255,255,255,0.12);
+}
+
+.schedule-page .schedule-day--today::after {
+  background: #e2d9ca;
+}
+
+.schedule-page .schedule-day--selected,
+.schedule-page .schedule-slot-btn--active {
+  background: #f1f1f1;
+  color: #101010;
+  border-color: #f1f1f1;
+}
+
+.schedule-page .schedule-day--past,
+.schedule-page .schedule-day--unavailable {
+  color: rgba(255,255,255,0.28);
+  text-decoration-color: rgba(255,255,255,0.22);
+}
+
+.schedule-page .schedule-slot-btn {
+  color: #f1f1f1;
+  border-color: rgba(255,255,255,0.24);
+}
+
+.schedule-page .schedule-slot-btn:hover {
+  border-color: rgba(255,255,255,0.5);
+  background: rgba(255,255,255,0.08);
+}
+
+.schedule-page .schedule-booking .form-field label {
+  color: rgba(255,255,255,0.85);
+}
+
+.schedule-page .schedule-booking .form-field input,
+.schedule-page .schedule-booking .form-field textarea {
+  color: #f5f5f5;
+  border-bottom-color: rgba(255,255,255,0.25);
+}
+
+.schedule-page .schedule-booking .form-field textarea {
+  border-color: rgba(255,255,255,0.2);
+}
+
+.schedule-page .schedule-booking .form-field input:focus,
+.schedule-page .schedule-booking .form-field textarea:focus {
+  border-bottom-color: rgba(255,255,255,0.62);
+}
+
+.schedule-page .schedule-selected-text {
+  color: #efe5d4;
+}
+
+.schedule-confirmation {
+  margin-top: 2px;
+  padding: 24px 28px;
+  border-top: 1px solid rgba(255,255,255,0.16);
+  background: #111111;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+}
+
+.schedule-confirmation__text {
+  font-family: var(--font-sans);
+  font-size: 1.05rem;
+  font-weight: 500;
+  color: rgba(255,255,255,0.93);
+}
+
+.schedule-integration-note {
+  margin-top: 18px;
+  font-family: var(--font-sans);
+  font-size: 0.66rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  opacity: 0.86;
+}
+
+@media (max-width: 700px) {
+  .schedule-confirmation {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
+
 /* ---- Painel de horários ---- */
 .schedule-slots-panel {
   padding: 32px 20px 24px;
