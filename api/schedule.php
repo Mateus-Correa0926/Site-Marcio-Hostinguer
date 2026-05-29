@@ -43,10 +43,8 @@ function getMonthAvailability($month) {
     $cursor = clone $firstDay;
     while ($cursor <= $lastDay) {
         $dateStr = $cursor->format('Y-m-d');
-        $weekday = (int)$cursor->format('N'); // 1=Mon, 7=Sun
-
-        // Fim de semana ou dia no passado
-        if ($weekday >= 6 || $cursor < $today) {
+        // Dia no passado
+        if ($cursor < $today) {
             $unavailable[] = $dateStr;
             $cursor->modify('+1 day');
             continue;
@@ -81,16 +79,6 @@ function getAvailableSlots() {
     $timezone = new DateTimeZone(GOOGLE_CALENDAR_TIMEZONE);
     $dayStart = new DateTime($date . ' 00:00:00', $timezone);
     $dayEnd = new DateTime($date . ' 23:59:59', $timezone);
-    $weekday = (int)$dayStart->format('N');
-
-    if ($weekday >= 6) {
-        successResponse([
-            'date' => $date,
-            'timezone' => GOOGLE_CALENDAR_TIMEZONE,
-            'slots' => []
-        ]);
-    }
-
     $busyRanges = getBusyRanges($provider, $dayStart, $dayEnd);
     $slots = buildDaySlots($date, $busyRanges, $timezone);
 
@@ -134,10 +122,6 @@ function bookMeeting() {
     $start = new DateTime($date . ' ' . $startTime . ':00', $timezone);
     $end = clone $start;
     $end->modify('+' . GOOGLE_CALENDAR_SLOT_MINUTES . ' minutes');
-
-    if ((int)$start->format('N') >= 6) {
-        errorResponse('Não há agendamento disponível no fim de semana.', 422);
-    }
 
     $hour = (int)$start->format('G');
     if ($hour < GOOGLE_CALENDAR_WORKDAY_START_HOUR || $hour >= GOOGLE_CALENDAR_WORKDAY_END_HOUR) {

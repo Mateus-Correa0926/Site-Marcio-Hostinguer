@@ -93,7 +93,6 @@
     for (var d = 1; d <= daysInMonth; d++) {
       var ds = dateStr(year, month, d);
       var dayDate = new Date(year, month, d);
-      var wd = dayDate.getDay();
       var btn = document.createElement('button');
       btn.type = 'button';
       btn.textContent = d;
@@ -104,11 +103,10 @@
       if (ds === selectedDay) classes.push('schedule-day--selected');
 
       var isPast = ds < todayStr;
-      var isWeekend = wd === 0 || wd === 6;
       var isUnavail = availability && availability.unavailable && availability.unavailable.indexOf(ds) !== -1;
       var isAvail = availability && availability.available && availability.available.indexOf(ds) !== -1;
 
-      if (isPast || isWeekend) {
+      if (isPast) {
         classes.push('schedule-day--past');
         btn.disabled = true;
       } else if (isUnavail) {
