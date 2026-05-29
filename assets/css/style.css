@@ -802,7 +802,14 @@ body.no-scroll { overflow: hidden !important; }
 .schedule-light .schedule-day--selected,
 .schedule-light .schedule-day--selected:hover {
   background: var(--dark);
-  color: #ffffff;
+  color: #ffffff !important;
+  font-weight: 600;
+}
+
+.schedule-light .schedule-day--selected.schedule-day--unavailable,
+.schedule-light .schedule-day--selected.schedule-day--past,
+.schedule-light .schedule-day--selected.schedule-day--available {
+  color: #ffffff !important;
 }
 
 .schedule-light .schedule-day--unavailable {
