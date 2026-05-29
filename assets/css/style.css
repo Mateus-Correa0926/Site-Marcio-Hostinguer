@@ -810,6 +810,64 @@ body.no-scroll { overflow: hidden !important; }
   text-decoration-color: rgba(0,0,0,0.45);
 }
 
+.schedule-light .schedule-day--past {
+  color: #b7b7b7;
+}
+
+.schedule-light .schedule-day--past,
+.schedule-light .schedule-day--unavailable {
+  cursor: pointer;
+}
+
+.schedule-light .schedule-day--past:hover,
+.schedule-light .schedule-day--unavailable:hover {
+  background: rgba(0,0,0,0.06);
+}
+
+.schedule-alert {
+  position: fixed;
+  inset: 0;
+  z-index: 2400;
+  display: grid;
+  place-items: center;
+}
+
+.schedule-alert__backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(10,10,10,0.35);
+  backdrop-filter: blur(2px);
+}
+
+.schedule-alert__card {
+  position: relative;
+  z-index: 1;
+  width: min(460px, calc(100vw - 32px));
+  background: #ffffff;
+  border: 1px solid rgba(0,0,0,0.12);
+  border-radius: 10px;
+  box-shadow: 0 24px 70px rgba(0,0,0,0.24);
+  padding: 28px 24px;
+}
+
+.schedule-alert__label {
+  font-family: var(--font-sans);
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  color: rgba(0,0,0,0.6);
+  margin-bottom: 10px;
+}
+
+.schedule-alert__message {
+  font-family: var(--font-serif);
+  font-size: 1.35rem;
+  line-height: 1.35;
+  color: #121212;
+  margin-bottom: 20px;
+}
+
 @media (max-width: 960px) {
   .schedule-light .schedule-slots {
     grid-template-columns: repeat(3, minmax(76px, 1fr));

@@ -8,7 +8,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=Great+Vibes&family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
   <title>Agenda — Stornoway Films</title>
-  <link rel="stylesheet" href="/assets/css/style.css?v=20260529b" />
+  <link rel="stylesheet" href="/assets/css/style.css?v=20260529c" />
 </head>
 <body class="schedule-light">
 
@@ -73,6 +73,15 @@
         <div class="schedule-slots-panel" id="schedule-slots-panel">
           <p class="schedule-slots-panel__hint" id="schedule-slots-hint">Selecione uma data para ver os horários.</p>
           <div class="schedule-slots" id="schedule-slots"></div>
+        </div>
+      </div>
+
+      <div class="schedule-alert" id="schedule-alert" style="display:none;" role="dialog" aria-modal="true" aria-labelledby="schedule-alert-title">
+        <div class="schedule-alert__backdrop" id="schedule-alert-backdrop"></div>
+        <div class="schedule-alert__card">
+          <p class="schedule-alert__label" id="schedule-alert-title">Data indisponível</p>
+          <p class="schedule-alert__message" id="schedule-alert-message">Este dia não está disponível para agendamento.</p>
+          <button type="button" class="btn btn--solid-dark" id="schedule-alert-close">Entendi</button>
         </div>
       </div>
 
@@ -150,8 +159,8 @@
     </div>
   </footer>
 
-  <script src="/assets/js/main.js?v=20260529b" defer></script>
-  <script src="/assets/js/scheduler-page.js?v=20260529b" defer></script>
-  <script src="/assets/js/cms.js?v=20260529b" defer></script>
+  <script src="/assets/js/main.js?v=20260529c" defer></script>
+  <script src="/assets/js/scheduler-page.js?v=20260529c" defer></script>
+  <script src="/assets/js/cms.js?v=20260529c" defer></script>
 </body>
 </html>

@@ -23,6 +23,10 @@
   var confirmationText = document.getElementById('schedule-confirmation-text');
   var confirmationContinue = document.getElementById('schedule-confirmation-continue');
   var integrationNote = document.getElementById('schedule-integration-note');
+  var alertBox = document.getElementById('schedule-alert');
+  var alertMessage = document.getElementById('schedule-alert-message');
+  var alertClose = document.getElementById('schedule-alert-close');
+  var alertBackdrop = document.getElementById('schedule-alert-backdrop');
 
   var today = new Date();
   var currentYear = today.getFullYear();
@@ -76,6 +80,25 @@
     if (confirmationBox) confirmationBox.style.display = 'none';
   }
 
+  function formatDayForMessage(date) {
+    var parts = date.split('-');
+    var d = new Date(parseInt(parts[0], 10), parseInt(parts[1], 10) - 1, parseInt(parts[2], 10));
+    return d.getDate() + ' de ' + MONTHS_PT_LOWER[d.getMonth()] + ' de ' + d.getFullYear();
+  }
+
+  function openUnavailableAlert(message) {
+    if (!alertBox || !alertMessage) return;
+    alertMessage.textContent = message;
+    alertBox.style.display = 'grid';
+    document.body.classList.add('no-scroll');
+  }
+
+  function closeUnavailableAlert() {
+    if (!alertBox) return;
+    alertBox.style.display = 'none';
+    document.body.classList.remove('no-scroll');
+  }
+
   function renderCalendar(year, month, availability) {
     calDaysEl.innerHTML = '';
     calMonthLabel.textContent = MONTHS_PT[month] + ' ' + year;
@@ -92,7 +115,6 @@
 
     for (var d = 1; d <= daysInMonth; d++) {
       var ds = dateStr(year, month, d);
-      var dayDate = new Date(year, month, d);
       var btn = document.createElement('button');
       btn.type = 'button';
       btn.textContent = d;
@@ -108,19 +130,30 @@
 
       if (isPast) {
         classes.push('schedule-day--past');
-        btn.disabled = true;
       } else if (isUnavail) {
         classes.push('schedule-day--unavailable');
-        btn.disabled = true;
       } else if (isAvail) {
         classes.push('schedule-day--available');
       } else {
         classes.push('schedule-day--loading');
+        btn.disabled = true;
       }
 
       btn.className = classes.join(' ');
 
-      if (!btn.disabled) {
+      if (isPast) {
+        btn.addEventListener('click', (function (dateValue) {
+          return function () {
+            openUnavailableAlert('A data ' + formatDayForMessage(dateValue) + ' já passou e não está disponível para agendamento.');
+          };
+        })(ds));
+      } else if (isUnavail) {
+        btn.addEventListener('click', (function (dateValue) {
+          return function () {
+            openUnavailableAlert('Não há horários disponíveis em ' + formatDayForMessage(dateValue) + '. Escolha outro dia.');
+          };
+        })(ds));
+      } else if (!btn.disabled) {
         btn.addEventListener('click', function () {
           var prev = calDaysEl.querySelector('.schedule-day--selected');
           if (prev) prev.classList.remove('schedule-day--selected');
@@ -325,6 +358,20 @@
       window.scrollTo({ top: schedulerSection.offsetTop - 60, behavior: 'smooth' });
     });
   }
+
+  if (alertClose) {
+    alertClose.addEventListener('click', closeUnavailableAlert);
+  }
+
+  if (alertBackdrop) {
+    alertBackdrop.addEventListener('click', closeUnavailableAlert);
+  }
+
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape' && alertBox && alertBox.style.display !== 'none') {
+      closeUnavailableAlert();
+    }
+  });
 
   fetchMonthAvailability(currentYear, currentMonth);
 })();

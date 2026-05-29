@@ -122,6 +122,11 @@ function bookMeeting() {
     $start = new DateTime($date . ' ' . $startTime . ':00', $timezone);
     $end = clone $start;
     $end->modify('+' . GOOGLE_CALENDAR_SLOT_MINUTES . ' minutes');
+    $now = new DateTime('now', $timezone);
+
+    if ($start <= $now) {
+        errorResponse('Esse horário já passou. Escolha um horário futuro.', 422);
+    }
 
     $hour = (int)$start->format('G');
     if ($hour < GOOGLE_CALENDAR_WORKDAY_START_HOUR || $hour >= GOOGLE_CALENDAR_WORKDAY_END_HOUR) {
@@ -168,6 +173,8 @@ function getBusyRanges($provider, DateTime $timeMin, DateTime $timeMax) {
 
 function buildDaySlots($date, $busyRanges, DateTimeZone $timezone) {
     $slots = [];
+    $now = new DateTime('now', $timezone);
+    $currentDate = $now->format('Y-m-d');
     $cursor = new DateTime($date . ' ' . sprintf('%02d:00:00', GOOGLE_CALENDAR_WORKDAY_START_HOUR), $timezone);
     $endWorkday = new DateTime($date . ' ' . sprintf('%02d:00:00', GOOGLE_CALENDAR_WORKDAY_END_HOUR), $timezone);
 
@@ -177,6 +184,11 @@ function buildDaySlots($date, $busyRanges, DateTimeZone $timezone) {
 
         if ($slotEnd > $endWorkday) {
             break;
+        }
+
+        if ($date === $currentDate && $cursor <= $now) {
+            $cursor->modify('+' . GOOGLE_CALENDAR_SLOT_MINUTES . ' minutes');
+            continue;
         }
 
         $busy = isRangeBusy($cursor, $slotEnd, $busyRanges);
