@@ -722,7 +722,8 @@ body.no-scroll { overflow: hidden !important; }
 }
 
 .schedule-light .schedule-hero .contact-hero__label {
-  opacity: 0.9;
+  color: #000000;
+  opacity: 1;
 }
 
 .schedule-light .schedule-section {
@@ -792,6 +793,16 @@ body.no-scroll { overflow: hidden !important; }
 .schedule-light .schedule-day,
 .schedule-light .schedule-section__title {
   color: #121212;
+}
+
+.schedule-light .schedule-day--available {
+  color: #6a6a6a;
+}
+
+.schedule-light .schedule-day--selected,
+.schedule-light .schedule-day--selected:hover {
+  background: var(--dark);
+  color: #ffffff;
 }
 
 .schedule-light .schedule-day--unavailable {
