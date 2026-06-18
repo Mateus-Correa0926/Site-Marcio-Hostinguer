@@ -35,6 +35,7 @@
   var currentSelectedSlotBtn = null;
   var availabilityCache = {};
   var currentProvider = 'admin';
+  var fetchGeneration = 0;
 
   var MONTHS_PT = [
     'Janeiro', 'Fevereiro', 'Marco', 'Abril', 'Maio', 'Junho',
@@ -167,7 +168,12 @@
     }
   }
 
-  function fetchMonthAvailability(year, month) {
+  function fetchMonthAvailability(year, month, attempt) {
+    if (attempt === undefined) attempt = 1;
+    var MAX_ATTEMPTS = 3;
+    var RETRY_DELAY = 1500;
+    var gen = ++fetchGeneration;
+
     var key = year + '-' + pad(month + 1);
     if (availabilityCache[key] !== undefined) {
       renderCalendar(year, month, availabilityCache[key]);
@@ -181,8 +187,12 @@
       method: 'GET',
       headers: { 'Accept': 'application/json' }
     })
-      .then(function (res) { return res.json(); })
+      .then(function (res) {
+        if (!res.ok) throw new Error('HTTP ' + res.status);
+        return res.json();
+      })
       .then(function (result) {
+        if (gen !== fetchGeneration) return;
         if (!result.success || !result.data) {
           setStatus(result.message || 'Nao foi possivel consultar a agenda.', 'error');
           return;
@@ -195,7 +205,24 @@
         setStatus('Selecione um dia disponivel para ver os horarios.', 'info');
       })
       .catch(function () {
-        setStatus('Erro de conexao ao carregar disponibilidade.', 'error');
+        if (gen !== fetchGeneration) return;
+        if (attempt < MAX_ATTEMPTS) {
+          setTimeout(function () {
+            if (gen !== fetchGeneration) return;
+            fetchMonthAvailability(year, month, attempt + 1);
+          }, RETRY_DELAY);
+        } else {
+          setStatus('Erro ao carregar a agenda. Clique aqui para tentar novamente.', 'error');
+          if (statusEl) {
+            statusEl.style.cursor = 'pointer';
+            var handler = function () {
+              statusEl.removeEventListener('click', handler);
+              statusEl.style.cursor = '';
+              fetchMonthAvailability(year, month);
+            };
+            statusEl.addEventListener('click', handler);
+          }
+        }
       });
   }
 
@@ -371,6 +398,17 @@
     if (e.key === 'Escape' && alertBox && alertBox.style.display !== 'none') {
       closeUnavailableAlert();
     }
+  });
+
+  window.addEventListener('pageshow', function (e) {
+    if (!e.persisted) return;
+    today = new Date();
+    currentYear = today.getFullYear();
+    currentMonth = today.getMonth();
+    availabilityCache = {};
+    selectedDay = null;
+    clearSlots();
+    fetchMonthAvailability(currentYear, currentMonth);
   });
 
   fetchMonthAvailability(currentYear, currentMonth);
