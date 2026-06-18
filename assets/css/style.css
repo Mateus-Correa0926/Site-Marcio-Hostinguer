@@ -652,19 +652,14 @@ body.no-scroll { overflow: hidden !important; }
   background: rgba(255,255,255,0.08);
 }
 
-.schedule-page .schedule-booking .form-field label,
-.schedule-light .schedule-booking .form-field label {
+.schedule-page .schedule-booking .form-field label {
   color: rgba(255,255,255,0.85);
-  margin-top: 5vh;
 }
 
 .schedule-page .schedule-booking .form-field input,
-.schedule-page .schedule-booking .form-field textarea,
-.schedule-light .schedule-booking .form-field input,
-.schedule-light .schedule-booking .form-field textarea {
+.schedule-page .schedule-booking .form-field textarea {
   color: #f5f5f5;
   border-bottom-color: rgba(255,255,255,0.25);
-  padding: 10px 0;
 }
 
 .schedule-page .schedule-booking .form-field textarea {
@@ -834,6 +829,16 @@ body.no-scroll { overflow: hidden !important; }
 .schedule-light .schedule-day--past:hover,
 .schedule-light .schedule-day--unavailable:hover {
   background: rgba(0,0,0,0.06);
+}
+
+.schedule-light .schedule-booking .form-field label {
+  margin-top: 5vh;
+}
+
+.schedule-light .schedule-booking .form-field input,
+.schedule-light .schedule-booking .form-field select,
+.schedule-light .schedule-booking .form-field textarea {
+  padding: 10px 0;
 }
 
 .schedule-alert {
