@@ -1,0 +1,37 @@
+﻿.contact-form-section {
+  background: var(--cream);
+  padding: 80px 40px;
+}
+.contact-form-section__inner {
+  max-width: 720px;
+  margin: 0 auto;
+}
+.contact-tabs {
+  display: flex;
+  border: 1px solid var(--dark);
+  margin-bottom: 48px;
+}
+.contact-tab {
+  flex: 1;
+  padding: 14px;
+  font-family: var(--font-sans);
+  font-size: 0.6rem;
+  font-weight: 600;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  text-align: center;
+  border: none;
+  background: transparent;
+  color: var(--dark);
+  cursor: pointer;
+  transition: all 0.3s;
+}
+.contact-tab--active {
+  background: var(--dark);
+  color: var(--white);
+}
+.contact-form {
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+}

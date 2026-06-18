@@ -1,0 +1,249 @@
+﻿.film-video-section {
+  background: var(--black);
+  padding: 60px 40px;
+}
+.film-video-section__inner {
+  max-width: 900px;
+  margin: 0 auto;
+}
+.film-video-section__label {
+  font-family: var(--font-sans);
+  font-size: 0.65rem;
+  font-weight: 500;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.5);
+  text-align: center;
+  margin-bottom: 12px;
+}
+.film-video-section__title {
+  font-family: var(--font-serif);
+  font-size: clamp(1.5rem, 3vw, 2.2rem);
+  font-weight: 300;
+  font-style: italic;
+  color: var(--white);
+  text-align: center;
+  margin-bottom: 30px;
+}
+
+/* ===== FILMS PORTFOLIO PAGE ===== */
+.portfolio-grid {
+  padding: 80px 40px;
+  background: var(--white);
+}
+.portfolio-grid__inner {
+  max-width: 1000px;
+  margin: 0 auto;
+}
+.portfolio-item {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 40px;
+  align-items: center;
+  margin-bottom: 80px;
+  padding-bottom: 80px;
+  border-bottom: 1px solid rgba(0,0,0,0.06);
+}
+.portfolio-item:last-child {
+  border-bottom: none;
+  margin-bottom: 0;
+  padding-bottom: 0;
+}
+.portfolio-item:nth-child(even) { direction: rtl; }
+.portfolio-item:nth-child(even) > * { direction: ltr; }
+.portfolio-item__media {
+  overflow: hidden;
+}
+.portfolio-item__media img {
+  width: 100%;
+  aspect-ratio: 4/3;
+  object-fit: cover;
+  transition: transform 0.6s ease;
+}
+.portfolio-item:hover .portfolio-item__media img {
+  transform: scale(1.03);
+}
+.portfolio-item__media .video-embed {
+  position: relative;
+  width: 100%;
+  padding-bottom: 56.25%;
+}
+.portfolio-item__media .video-embed iframe {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  border: 0;
+  border-radius: 4px;
+}
+.portfolio-item__info { padding: 0 20px; }
+.portfolio-item__names {
+  font-family: var(--font-script);
+  font-size: 1.8rem;
+  color: var(--dark);
+  margin-bottom: 4px;
+}
+.portfolio-item__location {
+  font-family: var(--font-sans);
+  font-size: 0.6rem;
+  font-weight: 600;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--gray);
+  margin-bottom: 20px;
+}
+.portfolio-item__desc {
+  font-family: var(--font-sans);
+  font-size: 0.78rem;
+  font-weight: 300;
+  line-height: 1.9;
+  color: var(--gray);
+}
+
+@media (max-width: 768px) {
+  .portfolio-item {
+    grid-template-columns: 1fr;
+    gap: 24px;
+  }
+  .portfolio-item:nth-child(even) { direction: ltr; }
+}
+
+/* ===== FEATURED FILMS PAGE ===== */
+.featured-film {
+  padding: 0;
+}
+.featured-film__hero {
+  position: relative;
+  height: 80vh;
+  overflow: hidden;
+  display: flex;
+  align-items: flex-end;
+}
+.featured-film__hero-bg {
+  position: absolute; inset: 0;
+}
+.featured-film__hero-bg img,
+.featured-film__hero-bg video {
+  width: 100%; height: 100%;
+  object-fit: cover;
+}
+.featured-film__hero-overlay {
+  position: absolute; inset: 0;
+  background: linear-gradient(to top, rgba(0,0,0,0.8), transparent 60%);
+}
+.featured-film__hero-content {
+  position: relative;
+  z-index: 2;
+  padding: 60px;
+  color: var(--white);
+}
+.featured-film__names {
+  font-family: var(--font-serif);
+  font-size: clamp(2rem, 4vw, 3.5rem);
+  font-weight: 300;
+  font-style: italic;
+  color: var(--white);
+  margin-bottom: 8px;
+}
+.featured-film__location {
+  font-family: var(--font-sans);
+  font-size: 0.65rem;
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.7);
+}
+
+.featured-film__details {
+  background: var(--cream);
+  padding: 80px 40px;
+}
+.featured-film__details-inner {
+  max-width: 700px;
+  margin: 0 auto;
+}
+.featured-film__about-label {
+  font-family: var(--font-sans);
+  font-size: 0.6rem;
+  font-weight: 600;
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+  color: var(--gray);
+  margin-bottom: 20px;
+}
+.featured-film__about-text {
+  font-family: var(--font-sans);
+  font-size: 0.85rem;
+  font-weight: 300;
+  line-height: 1.9;
+  color: var(--gray-dark);
+  margin-bottom: 40px;
+}
+.featured-film__vendors-label {
+  font-family: var(--font-sans);
+  font-size: 0.6rem;
+  font-weight: 600;
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+  color: var(--gray);
+  margin-bottom: 16px;
+}
+.featured-film__vendors {
+  font-family: var(--font-sans);
+  font-size: 0.78rem;
+  font-weight: 300;
+  line-height: 2;
+  color: var(--gray);
+}
+.featured-film__vendors a {
+  color: var(--dark);
+  border-bottom: 1px solid rgba(0,0,0,0.2);
+}
+
+.featured-film__testimonial {
+  background: var(--white);
+  padding: 80px 40px;
+  text-align: center;
+}
+.featured-film__testimonial-inner {
+  max-width: 650px;
+  margin: 0 auto;
+}
+.featured-film__testimonial-quote {
+  font-family: var(--font-serif);
+  font-size: clamp(1.1rem, 2vw, 1.4rem);
+  font-weight: 400;
+  font-style: italic;
+  line-height: 1.8;
+  color: var(--dark);
+  margin-bottom: 24px;
+}
+.featured-film__testimonial-author {
+  font-family: var(--font-sans);
+  font-size: 0.65rem;
+  font-weight: 600;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--gray);
+}
+
+/* Film gallery within featured */
+.featured-film__gallery {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 4vh;
+  padding: 4vh;
+}
+.featured-film__gallery img {
+  width: 100%;
+  aspect-ratio: 1;
+  object-fit: cover;
+  border-radius: 4px;
+}
+
+@media (max-width: 768px) {
+  .featured-film__gallery {
+    grid-template-columns: 1fr 1fr;
+  }
+  .featured-film__hero { height: 60vh; }
+  .featured-film__hero-content { padding: 30px; }
+}

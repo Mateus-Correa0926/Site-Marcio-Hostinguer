@@ -1,0 +1,212 @@
+﻿/* ===== EXPERIENCE / INVESTMENT ===== */
+.investment {
+  background: var(--cream);
+  padding: 100px 40px;
+  text-align: center;
+}
+.investment__inner {
+  max-width: 700px;
+  margin: 0 auto;
+}
+.investment__label {
+  font-family: var(--font-sans);
+  font-size: 0.65rem;
+  font-weight: 600;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: var(--gray);
+  margin-bottom: 12px;
+}
+.investment__title {
+  font-family: var(--font-serif);
+  font-size: clamp(1.8rem, 3.5vw, 2.8rem);
+  font-weight: 300;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--dark);
+  margin-bottom: 20px;
+}
+.investment__price {
+  font-family: var(--font-sans);
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--dark);
+  margin-bottom: 24px;
+}
+.investment__text {
+  font-family: var(--font-sans);
+  font-size: 0.78rem;
+  font-weight: 300;
+  line-height: 1.9;
+  color: var(--gray);
+  margin-bottom: 40px;
+}
+.investment__quote {
+  font-family: var(--font-serif);
+  font-size: clamp(1.2rem, 2vw, 1.6rem);
+  font-weight: 400;
+  font-style: italic;
+  line-height: 1.6;
+  color: var(--dark);
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+/* ===== FAQ ===== */
+.faq {
+  padding: 100px 40px;
+  background: var(--white);
+}
+.faq__inner {
+  max-width: 700px;
+  margin: 0 auto;
+}
+.faq__title {
+  font-family: var(--font-sans);
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+  text-align: center;
+  color: var(--dark);
+  margin-bottom: 48px;
+}
+.faq__item {
+  border-bottom: 1px solid rgba(0,0,0,0.1);
+}
+.faq__question {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px 0;
+  cursor: pointer;
+  background: none;
+  border: none;
+  width: 100%;
+  text-align: left;
+}
+.faq__question-text {
+  font-family: var(--font-sans);
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--dark);
+}
+.faq__toggle {
+  font-size: 1.4rem;
+  color: var(--gray);
+  transition: transform 0.3s ease;
+  flex-shrink: 0;
+  margin-left: 16px;
+}
+.faq__item.active .faq__toggle {
+  transform: rotate(45deg);
+}
+.faq__answer {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.4s ease;
+}
+.faq__answer-inner {
+  padding: 0 0 20px;
+}
+.faq__answer-inner p {
+  font-family: var(--font-sans);
+  font-size: 0.78rem;
+  font-weight: 300;
+  line-height: 1.8;
+  color: var(--gray);
+}
+
+/* ===== EXPERIENCE PAGE SPECIFIC ===== */
+.experience-intro {
+  background: var(--cream);
+  padding: 100px 40px;
+  text-align: center;
+}
+.experience-intro__inner {
+  max-width: 700px;
+  margin: 0 auto;
+}
+.experience-intro__heading {
+  font-family: var(--font-sans);
+  font-size: 0.65rem;
+  font-weight: 600;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: var(--gray);
+  margin-bottom: 28px;
+}
+.experience-intro__text {
+  font-family: var(--font-sans);
+  font-size: 0.82rem;
+  font-weight: 300;
+  line-height: 1.9;
+  color: var(--gray-dark);
+}
+
+/* Large quote block */
+.quote-block {
+  background: var(--white);
+  padding: 80px 40px;
+  text-align: center;
+}
+.quote-block__text {
+  font-family: var(--font-serif);
+  font-size: clamp(1.3rem, 2.5vw, 2rem);
+  font-weight: 400;
+  font-style: italic;
+  line-height: 1.6;
+  color: var(--dark);
+  max-width: 700px;
+  margin: 0 auto;
+  letter-spacing: 0.02em;
+}
+
+/* Delivery info */
+.delivery-info {
+  background: var(--black);
+  padding: 80px 40px;
+}
+.delivery-info__inner {
+  max-width: 900px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 40px;
+  text-align: center;
+}
+.delivery-info__item {}
+.delivery-info__number {
+  font-family: var(--font-serif);
+  font-size: 3rem;
+  font-weight: 300;
+  color: var(--white);
+  margin-bottom: 8px;
+}
+.delivery-info__label {
+  font-family: var(--font-sans);
+  font-size: 0.6rem;
+  font-weight: 600;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.5);
+  margin-bottom: 12px;
+}
+.delivery-info__desc {
+  font-family: var(--font-sans);
+  font-size: 0.72rem;
+  font-weight: 300;
+  line-height: 1.7;
+  color: rgba(255,255,255,0.4);
+}
+
+@media (max-width: 768px) {
+  .delivery-info__inner {
+    grid-template-columns: 1fr;
+    gap: 40px;
+  }
+}
