@@ -654,12 +654,14 @@ body.no-scroll { overflow: hidden !important; }
 
 .schedule-page .schedule-booking .form-field label {
   color: rgba(255,255,255,0.85);
+  margin-top: 5vh;
 }
 
 .schedule-page .schedule-booking .form-field input,
 .schedule-page .schedule-booking .form-field textarea {
   color: #f5f5f5;
   border-bottom-color: rgba(255,255,255,0.25);
+  padding: 10px 0;
 }
 
 .schedule-page .schedule-booking .form-field textarea {
@@ -954,7 +956,7 @@ body.no-scroll { overflow: hidden !important; }
 /* ---- Formulário de confirmação ---- */
 .schedule-booking {
   margin-top: 2px;
-  border-top: 1px solid rgba(0,0,0,0.08);
+  /* border-top: 1px solid rgba(0,0,0,0.08); */
   background: #fff;
   padding: 40px 28px;
   display: flex;
