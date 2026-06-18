@@ -763,7 +763,8 @@ body.no-scroll { overflow: hidden !important; }
   color: #101010;
 }
 
-.schedule-light .schedule-slot-btn--active {
+.schedule-light .schedule-slot-btn--active,
+.schedule-light .schedule-slot-btn--active:hover {
   background: var(--dark);
   color: var(--white);
   border-color: var(--dark);
@@ -955,7 +956,8 @@ body.no-scroll { overflow: hidden !important; }
   background: rgba(0,0,0,0.03);
 }
 
-.schedule-slot-btn--active {
+.schedule-slot-btn--active,
+.schedule-slot-btn--active:hover {
   background: var(--dark);
   border-color: var(--dark);
   color: var(--white);
