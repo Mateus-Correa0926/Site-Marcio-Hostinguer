@@ -392,8 +392,11 @@
         '</div>' +
         '<input type="hidden" id="sfLibraryPath" value="' + esc(currentLibraryFile) + '" />' +
         '<div id="sfLibrarySec">' +
-          '<div id="sfLibraryList" class="library-grid"></div>' +
-          '<p id="sfLibraryMsg" class="library-loading">Carregando biblioteca...</p>' +
+          '<div class="field" style="margin-bottom:10px">' +
+            '<label>Vídeos salvos em uploads/videos</label>' +
+            '<select id="sfLibrarySelect"></select>' +
+            '<p id="sfLibraryMsg" class="field-hint">Carregando biblioteca...</p>' +
+          '</div>' +
         '</div>' +
         '<div id="sfUploadNewSec" style="display:none">' +
         (v && v.video_url_desktop
@@ -437,37 +440,27 @@
       });
     });
 
-    function renderLibraryCards() {
-      var list = q('#sfLibraryList');
+    function renderLibrarySelect() {
+      var list = q('#sfLibrarySelect');
       var msg = q('#sfLibraryMsg');
       var current = (q('#sfLibraryPath') || {}).value || '';
       if (!list || !msg) return;
 
       if (!libraryCache.length) {
-        list.innerHTML = '';
-        msg.textContent = 'Nenhum vídeo importado na pasta uploads/videos.';
+        list.innerHTML = '<option value="">Nenhum vídeo encontrado</option>';
+        msg.textContent = 'Nenhum vídeo encontrado na pasta uploads/videos.';
         return;
       }
 
-      msg.textContent = 'Escolha um vídeo da pasta:';
-      list.innerHTML = libraryCache.map(function (item) {
-        var selected = current === item.file_path ? ' is-selected' : '';
-        return '' +
-          '<div class="library-card' + selected + '" data-path="' + esc(item.file_path) + '">' +
-            '<video src="' + esc(item.url) + '" muted playsinline preload="metadata"></video>' +
-            '<div class="library-card__body">' +
-              '<p class="library-card__name">' + esc(item.name || item.file_path) + '</p>' +
-            '</div>' +
-          '</div>';
+      msg.textContent = 'Selecione um arquivo já importado para essa seção.';
+      var options = '<option value="">Selecione um vídeo</option>';
+      options += libraryCache.map(function (item) {
+        var selected = current === item.file_path ? ' selected' : '';
+        return '<option value="' + esc(item.file_path) + '"' + selected + '>' + esc(item.name || item.file_path) + '</option>';
       }).join('');
-
-      qq('.library-card', list).forEach(function (card) {
-        card.addEventListener('click', function () {
-          var path = this.dataset.path || '';
-          if (q('#sfLibraryPath')) q('#sfLibraryPath').value = path;
-          qq('.library-card', list).forEach(function (c) { c.classList.remove('is-selected'); });
-          this.classList.add('is-selected');
-        });
+      list.innerHTML = options;
+      list.addEventListener('change', function () {
+        if (q('#sfLibraryPath')) q('#sfLibraryPath').value = this.value || '';
       });
     }
 
@@ -482,7 +475,7 @@
       radio.addEventListener('change', toggleFileMode);
     });
     toggleFileMode();
-    loadVideoLibrary().then(renderLibraryCards);
+    loadVideoLibrary().then(renderLibrarySelect);
 
     /* drop zone */
     var zone  = q('#sfDropZone');
@@ -631,21 +624,6 @@
     q('#refreshBtn').addEventListener('click', loadVideos);
 
     /* Quick add */
-    if (q('#addVideoBtn')) {
-      q('#addVideoBtn').addEventListener('click', function () {
-        var options = SECTIONS.map(function (sec) {
-          return '<button class="btn btn-outline btn-sm js-open-sec" data-key="' + sec.key + '" type="button" style="justify-content:flex-start;width:100%;margin-bottom:8px">' + esc(sec.page + ' - ' + sec.label) + '</button>';
-        }).join('');
-        Modal.open('Escolha a seção para editar', '<div>' + options + '</div><div class="modal-footer"><button class="btn btn-outline btn-sm" id="pickClose">Fechar</button></div>');
-        qq('.js-open-sec').forEach(function (btn) {
-          btn.addEventListener('click', function () {
-            openEditor(this.dataset.key);
-          });
-        });
-        if (q('#pickClose')) q('#pickClose').addEventListener('click', function () { Modal.close(); });
-      });
-    }
-
     if (q('#importVideoBtn')) {
       q('#importVideoBtn').addEventListener('click', function () {
         switchView('library');

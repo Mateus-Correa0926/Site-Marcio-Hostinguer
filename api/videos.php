@@ -210,6 +210,8 @@ function getVideoLibrary() {
         return strcmp($b['updated_at'], $a['updated_at']);
     });
 
+    header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
+    header('Pragma: no-cache');
     successResponse($items);
 }
 
