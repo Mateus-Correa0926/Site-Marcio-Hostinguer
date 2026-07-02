@@ -343,14 +343,105 @@ function deleteVideo($db, $id) {
    ============================================================ */
 
 function uploadVideoFile($fieldName) {
-    $mime = mime_content_type($_FILES[$fieldName]['tmp_name']);
-    $allowed = ['video/mp4', 'video/webm'];
+    $mime    = mime_content_type($_FILES[$fieldName]['tmp_name']);
+    $allowed = ['video/mp4', 'video/webm', 'video/quicktime', 'video/x-msvideo'];
     if (!in_array($mime, $allowed, true)) {
-        errorResponse('Formato de vídeo inválido. Use .mp4 ou .webm', 400);
+        errorResponse('Formato de vídeo inválido. Use .mp4, .webm, .mov ou .avi', 400);
     }
     $result = FileUploader::upload($_FILES[$fieldName], 'videos');
     if (isset($result['error'])) errorResponse($result['error'], 400);
-    return $result['file_path'];
+
+    $filePath = $result['file_path']; // relativo ao UPLOAD_DIR, ex: videos/abc_123.mp4
+
+    // Tentar converter para WebM se o arquivo não for já WebM
+    if ($mime !== 'video/webm') {
+        $converted = convertToWebm(UPLOAD_DIR . $filePath);
+        if ($converted !== null) {
+            // Conversão bem-sucedida: remover original e usar WebM
+            @unlink(UPLOAD_DIR . $filePath);
+            $filePath = 'videos/' . basename($converted);
+        }
+        // Se falhou, mantém o arquivo original sem erro
+    }
+
+    return $filePath;
+}
+
+/**
+ * Converte um arquivo de vídeo para WebM (VP9 + Opus) via FFmpeg.
+ *
+ * Retorna o caminho absoluto do arquivo WebM gerado,
+ * ou null se FFmpeg não estiver disponível ou a conversão falhar.
+ *
+ * Nota: requer FFmpeg instalado no servidor.
+ * Hostinger VPS/Cloud suporta FFmpeg; shared hosting pode não ter.
+ */
+function convertToWebm($absoluteSourcePath) {
+    // Localizar FFmpeg
+    $ffmpeg = findFfmpeg();
+    if (!$ffmpeg) return null;
+
+    // Caminho de destino: mesmo diretório, extensão .webm
+    $dest = preg_replace('/\.[^.]+$/', '.webm', $absoluteSourcePath);
+
+    // Garantir nome único caso já exista
+    if (file_exists($dest)) {
+        $dest = preg_replace('/\.webm$/', '_' . time() . '.webm', $dest);
+    }
+
+    // Escapa os caminhos para uso no shell
+    $srcEsc  = escapeshellarg($absoluteSourcePath);
+    $dstEsc  = escapeshellarg($dest);
+
+    // VP9 + Opus: qualidade constante (crf 33), modo realtime para hosting compartilhado
+    // -threads 2 evita sobrecarga em ambientes limitados
+    $cmd = "$ffmpeg -y -i $srcEsc "
+         . "-c:v libvpx-vp9 -crf 33 -b:v 0 -deadline realtime -cpu-used 8 "
+         . "-c:a libopus -b:a 96k -threads 2 "
+         . "$dstEsc 2>/dev/null";
+
+    $exitCode = null;
+    exec($cmd, $output, $exitCode);
+
+    if ($exitCode === 0 && file_exists($dest) && filesize($dest) > 0) {
+        return $dest;
+    }
+
+    // Limpar arquivo parcial se existir
+    if (file_exists($dest)) @unlink($dest);
+
+    return null;
+}
+
+/**
+ * Localiza o binário do FFmpeg em caminhos comuns de servidor Linux/Hostinger.
+ * Retorna o caminho ou null se não encontrado / exec() desabilitado.
+ */
+function findFfmpeg() {
+    // exec() pode estar desabilitado em shared hosting
+    if (!function_exists('exec') || !is_callable('exec')) return null;
+
+    // Tentar `which ffmpeg` primeiro
+    $out = [];
+    exec('which ffmpeg 2>/dev/null', $out);
+    if (!empty($out[0]) && is_executable($out[0])) {
+        return trim($out[0]);
+    }
+
+    // Caminhos comuns em servidores Linux / Hostinger VPS
+    $candidates = [
+        '/usr/bin/ffmpeg',
+        '/usr/local/bin/ffmpeg',
+        '/opt/ffmpeg/bin/ffmpeg',
+        '/usr/ffmpeg/bin/ffmpeg',
+    ];
+    foreach ($candidates as $path) {
+        if (file_exists($path) && is_executable($path)) {
+            return $path;
+        }
+    }
+
+    return null;
 }
 
 function uploadPosterFile($fieldName) {

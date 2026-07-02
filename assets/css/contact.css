@@ -1,22 +1,41 @@
-﻿/* Contact intro (below video hero) */
+﻿/* Contact intro (below video hero) — mesmo padrão visual de about-intro */
 .contact-intro {
-  background: var(--black);
-  padding: 60px 40px;
+  background: var(--cream);
+  padding: 100px 40px;
   text-align: center;
 }
-.contact-intro__text {
-  font-family: var(--font-sans);
-  font-size: 0.78rem;
-  font-weight: 300;
-  line-height: 1.8;
-  color: rgba(255,255,255,0.6);
-  max-width: 550px;
+.contact-intro__inner {
+  max-width: 680px;
   margin: 0 auto;
 }
+.contact-intro__heading {
+  font-family: var(--font-sans);
+  font-size: 0.65rem;
+  font-weight: 600;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: var(--gray);
+  margin-bottom: 28px;
+}
+.contact-intro__text {
+  font-family: var(--font-serif);
+  font-size: clamp(1rem, 1.8vw, 1.3rem);
+  font-weight: 400;
+  line-height: 1.9;
+  color: var(--dark);
+  letter-spacing: 0.015em;
+}
 .contact-intro__email {
-  color: var(--white);
-  border-bottom: 1px solid rgba(255,255,255,0.3);
-  padding-bottom: 2px;
+  color: var(--dark);
+  border-bottom: 1px solid var(--dark);
+  padding-bottom: 1px;
+}
+
+@media (max-width: 768px) {
+  .contact-intro { padding: 70px 24px; }
+}
+@media (max-width: 480px) {
+  .contact-intro { padding: 50px 16px; }
 }
 
 .contact-form-section {
