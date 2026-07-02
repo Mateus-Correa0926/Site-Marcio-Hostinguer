@@ -202,6 +202,18 @@ function uploadVideoToLibrary() {
     ], 'Vídeo importado com sucesso', 201);
 }
 
+/**
+ * Garante que apenas um vídeo permaneça ativo por seção.
+ */
+function enforceSingleActiveVideoPerSection($db, $sectionKey, $keepId) {
+    $stmt = $db->prepare(
+        "UPDATE videos
+         SET is_active = 0, updated_at = NOW()
+         WHERE section_key = ? AND id <> ? AND is_active = 1"
+    );
+    $stmt->execute([$sectionKey, (int)$keepId]);
+}
+
 /* ============================================================
    CREATE
    ============================================================ */
@@ -278,6 +290,10 @@ function createVideo($db) {
         $isActive, $sortOrder
     ]);
     $newId = (int)$db->lastInsertId();
+
+    if ($isActive === 1) {
+        enforceSingleActiveVideoPerSection($db, $sectionKey, $newId);
+    }
 
     $stmt = $db->prepare("SELECT * FROM videos WHERE id = ?");
     $stmt->execute([$newId]);
@@ -369,6 +385,10 @@ function updateVideo($db, $id) {
         (int)$id
     ]);
 
+    if ($isActive === 1) {
+        enforceSingleActiveVideoPerSection($db, $sectionKey, (int)$id);
+    }
+
     $stmt = $db->prepare("SELECT * FROM videos WHERE id = ?");
     $stmt->execute([(int)$id]);
     successResponse(enrichVideo($stmt->fetch()), 'Vídeo atualizado com sucesso');
@@ -379,7 +399,7 @@ function updateVideo($db, $id) {
    ============================================================ */
 
 function toggleVideo($db, $id) {
-    $stmt = $db->prepare("SELECT id, is_active FROM videos WHERE id = ?");
+    $stmt = $db->prepare("SELECT id, section_key, is_active FROM videos WHERE id = ?");
     $stmt->execute([(int)$id]);
     $row = $stmt->fetch();
     if (!$row) errorResponse('Vídeo não encontrado', 404);
@@ -387,6 +407,10 @@ function toggleVideo($db, $id) {
     $newStatus = $row['is_active'] ? 0 : 1;
     $db->prepare("UPDATE videos SET is_active=?, updated_at=NOW() WHERE id=?")
        ->execute([$newStatus, (int)$id]);
+
+    if ($newStatus === 1) {
+        enforceSingleActiveVideoPerSection($db, $row['section_key'], (int)$id);
+    }
 
     successResponse(
         ['is_active' => $newStatus],
