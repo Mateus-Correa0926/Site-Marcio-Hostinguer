@@ -46,6 +46,10 @@ if ($method === 'POST' && in_array($routeKey, $publicRoutes['POST'])) {
 if ($method === 'POST' && $resource === 'auth' && $id === 'login') {
     $isPublic = true;
 }
+// Endpoint público: GET /api/videos/section/{section_key}
+if ($method === 'GET' && $resource === 'videos' && $id === 'section') {
+    $isPublic = true;
+}
 
 // Autenticar rotas protegidas
 $currentUser = null;
@@ -118,6 +122,11 @@ switch ($resource) {
     case 'fallback-pool':
         require_once __DIR__ . '/api/fallback-pool.php';
         handleFallbackPool($method, $id, $action, $currentUser);
+        break;
+
+    case 'videos':
+        require_once __DIR__ . '/api/videos.php';
+        handleVideos($method, $id, $action, $currentUser);
         break;
 
     case 'uploads':

@@ -1,4 +1,25 @@
-﻿.contact-form-section {
+﻿/* Contact intro (below video hero) */
+.contact-intro {
+  background: var(--black);
+  padding: 60px 40px;
+  text-align: center;
+}
+.contact-intro__text {
+  font-family: var(--font-sans);
+  font-size: 0.78rem;
+  font-weight: 300;
+  line-height: 1.8;
+  color: rgba(255,255,255,0.6);
+  max-width: 550px;
+  margin: 0 auto;
+}
+.contact-intro__email {
+  color: var(--white);
+  border-bottom: 1px solid rgba(255,255,255,0.3);
+  padding-bottom: 2px;
+}
+
+.contact-form-section {
   background: var(--cream);
   padding: 80px 40px;
 }

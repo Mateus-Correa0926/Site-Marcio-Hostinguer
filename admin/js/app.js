@@ -1108,10 +1108,410 @@
   });
 
   /* ============================================================
+     VIDEO MANAGER — Seções e tipos de vídeo
+     ============================================================ */
+  var VIDEO_SECTIONS = [
+    { key: 'home_banner',        label: 'Banner Principal (Home)' },
+    { key: 'home_institucional', label: 'Vídeo Institucional (Home)' },
+    { key: 'about_video',        label: 'Sobre — Hero' },
+    { key: 'films_video',        label: 'Filmes — Hero' },
+    { key: 'experience_video',   label: 'Experiência — Hero' },
+    { key: 'contact_video',      label: 'Contato — Hero' },
+    { key: 'featured_video',     label: 'Destaques — Hero' },
+    { key: 'youtube_section',    label: 'Área YouTube' },
+    { key: 'depoimentos_video',  label: 'Seção de Depoimentos' },
+    { key: 'produto_video',      label: 'Seção de Produto' }
+  ];
+
+  /* ============================================================
+     PAGE: VIDEOS LIST
+     ============================================================ */
+  Router.register('videos', function (param) {
+    if (param === 'new') return VideoEditor.render(null);
+    if (param)           return VideoEditor.render(param);
+
+    $('#pageTitle').textContent = 'Gerenciador de Vídeos';
+    $('#headerActions').innerHTML =
+      '<a href="#/videos/new" class="btn btn-primary">' +
+        '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14m-7-7h14"/></svg> ' +
+        'Novo Vídeo' +
+      '</a>';
+    $('#mainBody').innerHTML = '<div class="spinner"></div>';
+
+    api('GET', '/videos').then(function (res) {
+      var videos = res.data || [];
+      if (!videos.length) {
+        $('#mainBody').innerHTML =
+          '<div class="empty-state">' +
+            '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><polygon points="10 8 16 12 10 16 10 8" fill="currentColor" stroke="none"/></svg>' +
+            '<p>Nenhum vídeo cadastrado ainda.</p>' +
+            '<a href="#/videos/new" class="btn btn-primary">Adicionar Primeiro Vídeo</a>' +
+          '</div>';
+        return;
+      }
+
+      var html =
+        '<table class="data-table"><thead><tr>' +
+          '<th>Título</th>' +
+          '<th>Tipo</th>' +
+          '<th>Seção</th>' +
+          '<th>Status</th>' +
+          '<th style="width:60px">Ordem</th>' +
+          '<th style="width:200px">Ações</th>' +
+        '</tr></thead><tbody>';
+
+      videos.forEach(function (v) {
+        var typeBadge = v.type === 'youtube'
+          ? '<span class="badge badge-youtube">YouTube</span>'
+          : '<span class="badge badge-upload">Upload</span>';
+        var statusBadge = v.is_active == 1
+          ? '<span class="badge badge-published">Ativo</span>'
+          : '<span class="badge badge-draft">Inativo</span>';
+        var sectionLabel = (VIDEO_SECTIONS.find(function (s) { return s.key === v.section_key; }) || {}).label || v.section_key;
+        var toggleClass  = v.is_active == 1 ? 'btn-warning' : 'btn-success';
+        var toggleLabel  = v.is_active == 1 ? 'Desativar'   : 'Ativar';
+
+        html +=
+          '<tr>' +
+            '<td><strong>' + esc(v.title) + '</strong></td>' +
+            '<td>' + typeBadge + '</td>' +
+            '<td>' +
+              '<code style="font-size:11px;color:var(--admin-text-muted)">' + esc(v.section_key) + '</code><br>' +
+              '<small style="color:var(--admin-text-muted)">' + esc(sectionLabel) + '</small>' +
+            '</td>' +
+            '<td>' + statusBadge + '</td>' +
+            '<td style="text-align:center">' + v.sort_order + '</td>' +
+            '<td>' +
+              '<a href="#/videos/' + v.id + '" class="btn btn-secondary btn-sm">Editar</a> ' +
+              '<button class="btn btn-sm ' + toggleClass + ' btn-toggle-video" data-id="' + v.id + '">' + toggleLabel + '</button> ' +
+              '<button class="btn btn-danger btn-sm btn-delete-video" data-id="' + v.id + '" data-title="' + esc(v.title) + '">Excluir</button>' +
+            '</td>' +
+          '</tr>';
+      });
+
+      html += '</tbody></table>';
+      $('#mainBody').innerHTML = html;
+
+      $$('.btn-toggle-video').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+          var id = this.dataset.id;
+          api('PUT', '/videos/' + id + '/toggle').then(function () {
+            toast('Status atualizado', 'success');
+            Router.resolve();
+          });
+        });
+      });
+
+      $$('.btn-delete-video').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+          var id    = this.dataset.id;
+          var title = this.dataset.title;
+          confirm('Excluir vídeo?', '"' + title + '" será removido. Os arquivos no servidor serão mantidos.').then(function (ok) {
+            if (!ok) return;
+            api('DELETE', '/videos/' + id).then(function () {
+              toast('Vídeo excluído', 'success');
+              Router.resolve();
+            });
+          });
+        });
+      });
+    });
+  });
+
+  /* ============================================================
+     VIDEO EDITOR
+     ============================================================ */
+  var VideoEditor = {
+    video: null,
+    isNew: false,
+
+    render: function (id) {
+      this.isNew = !id || id === 'new';
+      var self = this;
+      $('#pageTitle').textContent = self.isNew ? 'Novo Vídeo' : 'Editar Vídeo';
+      $('#headerActions').innerHTML = '<a href="#/videos" class="btn btn-secondary">&larr; Voltar</a>';
+      $('#mainBody').innerHTML = '<div class="spinner"></div>';
+
+      if (self.isNew) {
+        self.video = { id: null, title: '', section_key: '', type: 'upload', is_active: 1, sort_order: 0 };
+        self.renderForm();
+      } else {
+        api('GET', '/videos/' + id).then(function (res) {
+          self.video = res.data;
+          self.renderForm();
+        });
+      }
+    },
+
+    renderForm: function () {
+      var v    = this.video;
+      var self = this;
+
+      var sectionOpts = '<option value="">Selecione uma seção...</option>';
+      VIDEO_SECTIONS.forEach(function (s) {
+        sectionOpts += '<option value="' + esc(s.key) + '"' + (v.section_key === s.key ? ' selected' : '') + '>' + esc(s.label) + '</option>';
+      });
+      var isCustomSection = v.section_key && !VIDEO_SECTIONS.find(function (s) { return s.key === v.section_key; });
+      var customSectionVal = isCustomSection ? v.section_key : '';
+      sectionOpts += '<option value="custom"' + (isCustomSection ? ' selected' : '') + '>Outro (personalizado)</option>';
+
+      var isYoutube    = v.type === 'youtube';
+      var ytCurrentUrl = v.youtube_video_id ? 'https://www.youtube.com/watch?v=' + v.youtube_video_id : '';
+
+      var html =
+        '<div class="card" style="margin-bottom:24px;">' +
+          '<h3 class="card__title">Informações Gerais</h3>' +
+          '<div class="form-group">' +
+            '<label class="form-label">Título Interno <span class="required">*</span></label>' +
+            '<input class="form-input" id="vf_title" value="' + esc(v.title) + '" placeholder="Ex: Banner Principal — Home" />' +
+          '</div>' +
+          '<div class="form-group">' +
+            '<label class="form-label">Seção do Site <span class="required">*</span></label>' +
+            '<select class="form-select" id="vf_section">' + sectionOpts + '</select>' +
+          '</div>' +
+          '<div class="form-group" id="vf_section_custom_wrap" style="' + (isCustomSection ? '' : 'display:none;') + '">' +
+            '<label class="form-label">Chave Personalizada</label>' +
+            '<input class="form-input" id="vf_section_custom" value="' + esc(customSectionVal) + '" placeholder="ex: minha_secao" />' +
+            '<p class="form-hint">Use apenas letras, números, _ e - (sem espaços)</p>' +
+          '</div>' +
+          '<div class="form-row">' +
+            '<div class="form-group">' +
+              '<label class="form-label">Ordem de Exibição</label>' +
+              '<input type="number" class="form-input" id="vf_order" value="' + (v.sort_order || 0) + '" min="0" />' +
+            '</div>' +
+            '<div class="form-group" style="display:flex;align-items:flex-end;padding-bottom:4px;">' +
+              '<label style="cursor:pointer;display:flex;align-items:center;gap:8px;font-size:13px;">' +
+                '<input type="checkbox" id="vf_active" ' + (v.is_active ? 'checked' : '') + ' /> ' +
+                'Vídeo Ativo' +
+              '</label>' +
+            '</div>' +
+          '</div>' +
+        '</div>' +
+
+        '<div class="card" style="margin-bottom:24px;">' +
+          '<h3 class="card__title">Tipo de Vídeo</h3>' +
+          '<div class="video-type-selector">' +
+            '<label class="video-type-option ' + (!isYoutube ? 'video-type-option--active' : '') + '">' +
+              '<input type="radio" name="vf_type" value="upload" ' + (!isYoutube ? 'checked' : '') + ' />' +
+              '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>' +
+              '<span>Upload de Arquivo</span>' +
+              '<small>.mp4 / .webm</small>' +
+            '</label>' +
+            '<label class="video-type-option ' + (isYoutube ? 'video-type-option--active' : '') + '">' +
+              '<input type="radio" name="vf_type" value="youtube" ' + (isYoutube ? 'checked' : '') + ' />' +
+              '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M22.54 6.42a2.78 2.78 0 0 0-1.95-1.97C18.88 4 12 4 12 4s-6.88 0-8.59.45A2.78 2.78 0 0 0 1.46 6.42 29 29 0 0 0 1 12a29 29 0 0 0 .46 5.58A2.78 2.78 0 0 0 3.41 19.6C5.12 20 12 20 12 20s6.88 0 8.59-.4a2.78 2.78 0 0 0 1.95-1.97A29 29 0 0 0 23 12a29 29 0 0 0-.46-5.58z"/><polygon points="9.75 15.02 15.5 12 9.75 8.98 9.75 15.02" fill="currentColor" stroke="none"/></svg>' +
+              '<span>YouTube</span>' +
+              '<small>Embed por URL</small>' +
+            '</label>' +
+          '</div>' +
+        '</div>' +
+
+        '<div id="vf_upload_section" class="card" style="margin-bottom:24px;' + (isYoutube ? 'display:none;' : '') + '">' +
+          '<h3 class="card__title">Arquivos de Vídeo</h3>' +
+          ((!self.isNew && v.video_url_desktop)
+            ? '<div class="current-video-preview"><label class="form-label">Vídeo Atual (Desktop)</label><video src="' + esc(v.video_url_desktop) + '" controls style="max-width:100%;max-height:200px;border-radius:8px;"></video></div>'
+            : '') +
+          '<div class="form-group">' +
+            '<label class="form-label">Vídeo Desktop <span class="required">*</span></label>' +
+            '<div class="upload-zone upload-zone--compact" id="vf_desktop_zone">' +
+              '<input type="file" id="vf_desktop_file" accept="video/mp4,video/webm" style="display:none" />' +
+              '<div class="upload-zone__icon">&#x1F4F9;</div>' +
+              '<p class="upload-zone__text" id="vf_desktop_label">' +
+                (v.video_file_desktop ? '&#x2713; ' + esc(v.video_file_desktop.split('/').pop()) + ' — clique para trocar' : '<strong>Clique para selecionar</strong> ou arraste aqui') +
+              '</p>' +
+              '<small style="color:var(--admin-text-muted)">MP4 ou WebM &middot; máx. 500 MB</small>' +
+            '</div>' +
+          '</div>' +
+          '<div class="form-group">' +
+            '<label class="form-label">Vídeo Mobile <em style="font-weight:300;text-transform:none">(opcional)</em></label>' +
+            '<div class="upload-zone upload-zone--compact" id="vf_mobile_zone">' +
+              '<input type="file" id="vf_mobile_file" accept="video/mp4,video/webm" style="display:none" />' +
+              '<div class="upload-zone__icon">&#x1F4F1;</div>' +
+              '<p class="upload-zone__text" id="vf_mobile_label">' +
+                (v.video_file_mobile ? '&#x2713; ' + esc(v.video_file_mobile.split('/').pop()) + ' — clique para trocar' : '<strong>Clique para selecionar</strong> ou arraste aqui') +
+              '</p>' +
+              '<small style="color:var(--admin-text-muted)">Versão mais leve para mobile &middot; MP4 ou WebM</small>' +
+            '</div>' +
+          '</div>' +
+          '<div class="form-group">' +
+            '<label class="form-label">Imagem de Capa / Poster <em style="font-weight:300;text-transform:none">(opcional)</em></label>' +
+            '<div class="upload-zone upload-zone--compact" id="vf_poster_zone">' +
+              '<input type="file" id="vf_poster_file" accept="image/*" style="display:none" />' +
+              '<div class="upload-zone__icon">&#x1F5BC;</div>' +
+              '<p class="upload-zone__text" id="vf_poster_label">' +
+                (v.poster_image ? '&#x2713; ' + esc(v.poster_image.split('/').pop()) + ' — clique para trocar' : '<strong>Clique para selecionar</strong> ou arraste aqui') +
+              '</p>' +
+              '<small style="color:var(--admin-text-muted)">JPG, PNG ou WebP</small>' +
+            '</div>' +
+          '</div>' +
+        '</div>' +
+
+        '<div id="vf_youtube_section" class="card" style="margin-bottom:24px;' + (isYoutube ? '' : 'display:none;') + '">' +
+          '<h3 class="card__title">YouTube</h3>' +
+          '<div class="form-group">' +
+            '<label class="form-label">URL do Vídeo <span class="required">*</span></label>' +
+            '<input class="form-input" id="vf_youtube_url" value="' + esc(ytCurrentUrl) + '" placeholder="https://www.youtube.com/watch?v=... ou https://youtu.be/..." />' +
+            '<p class="form-hint">Cole a URL. O sistema extrai o ID e gera o iframe automaticamente.</p>' +
+          '</div>' +
+          (v.youtube_video_id
+            ? '<div class="form-group"><label class="form-label">Preview Atual</label>' +
+              '<div class="video-yt-preview">' +
+                '<img src="https://img.youtube.com/vi/' + esc(v.youtube_video_id) + '/mqdefault.jpg" alt="" style="width:100%;max-width:400px;border-radius:8px;" />' +
+                '<p class="form-hint" style="margin-top:6px;">ID: <strong>' + esc(v.youtube_video_id) + '</strong></p>' +
+              '</div></div>'
+            : '') +
+          '<div class="yt-embed-info">' +
+            '<strong>Parâmetros gerados automaticamente no iframe:</strong>' +
+            '<ul>' +
+              '<li><code>autoplay=1</code> — inicia automaticamente</li>' +
+              '<li><code>mute=1</code> — sem som (necessário para autoplay)</li>' +
+              '<li><code>loop=1 &amp; playlist=ID</code> — loop infinito</li>' +
+              '<li><code>controls=0 &amp; rel=0 &amp; playsinline=1</code></li>' +
+            '</ul>' +
+          '</div>' +
+        '</div>' +
+
+        '<div class="save-bar">' +
+          '<a href="#/videos" class="btn btn-secondary">Cancelar</a>' +
+          '<button class="btn btn-primary" id="vf_save">Salvar Vídeo</button>' +
+        '</div>';
+
+      $('#mainBody').innerHTML = html;
+
+      $$('[name="vf_type"]').forEach(function (radio) {
+        radio.addEventListener('change', function () {
+          var isYt = this.value === 'youtube';
+          $('#vf_upload_section').style.display  = isYt ? 'none'  : 'block';
+          $('#vf_youtube_section').style.display = isYt ? 'block' : 'none';
+          $$('.video-type-option').forEach(function (el) {
+            el.classList.remove('video-type-option--active');
+          });
+          this.closest('.video-type-option').classList.add('video-type-option--active');
+        });
+      });
+
+      $('#vf_section').addEventListener('change', function () {
+        var wrap = $('#vf_section_custom_wrap');
+        if (wrap) wrap.style.display = this.value === 'custom' ? 'block' : 'none';
+      });
+
+      self.bindUploadZone('vf_desktop_zone', 'vf_desktop_file', 'vf_desktop_label',
+        ['video/mp4', 'video/webm']);
+      self.bindUploadZone('vf_mobile_zone',  'vf_mobile_file',  'vf_mobile_label',
+        ['video/mp4', 'video/webm']);
+      self.bindUploadZone('vf_poster_zone',  'vf_poster_file',  'vf_poster_label',
+        ['image/jpeg', 'image/png', 'image/webp', 'image/gif']);
+
+      $('#vf_save').addEventListener('click', function () { self.save(); });
+    },
+
+    bindUploadZone: function (zoneId, inputId, labelId, acceptedMimes) {
+      var zone  = $('#' + zoneId);
+      var input = $('#' + inputId);
+      var label = $('#' + labelId);
+      if (!zone || !input) return;
+
+      zone.addEventListener('click', function () { input.click(); });
+      zone.addEventListener('dragover', function (e) {
+        e.preventDefault();
+        zone.classList.add('upload-zone--drag');
+      });
+      zone.addEventListener('dragleave', function () {
+        zone.classList.remove('upload-zone--drag');
+      });
+      zone.addEventListener('drop', function (e) {
+        e.preventDefault();
+        zone.classList.remove('upload-zone--drag');
+        if (!e.dataTransfer.files.length) return;
+        var file = e.dataTransfer.files[0];
+        if (acceptedMimes.indexOf(file.type) === -1) {
+          toast('Tipo de arquivo não aceito: ' + file.type, 'error');
+          return;
+        }
+        try {
+          var dt = new DataTransfer();
+          dt.items.add(file);
+          input.files = dt.files;
+        } catch (err) { /* DataTransfer não disponível — ignora */ }
+        if (label) label.innerHTML = '&#x2713; ' + esc(file.name);
+      });
+      input.addEventListener('change', function () {
+        if (this.files.length && label) {
+          label.innerHTML = '&#x2713; ' + esc(this.files[0].name);
+        }
+      });
+    },
+
+    save: function () {
+      var self    = this;
+      var type    = (document.querySelector('[name="vf_type"]:checked') || {}).value || 'upload';
+      var sectEl  = $('#vf_section');
+      var sectionVal = sectEl ? sectEl.value : '';
+      if (sectionVal === 'custom') {
+        sectionVal = (($('#vf_section_custom') || {}).value || '').trim();
+      }
+      var title = (($('#vf_title') || {}).value || '').trim();
+
+      if (!title)      { toast('Título é obrigatório', 'error');              return; }
+      if (!sectionVal) { toast('Selecione ou informe uma seção', 'error');    return; }
+      if (!/^[a-zA-Z0-9_\-]+$/.test(sectionVal)) {
+        toast('Chave de seção inválida. Use apenas letras, números, _ e -', 'error');
+        return;
+      }
+
+      var fd = new FormData();
+      fd.append('type',        type);
+      fd.append('title',       title);
+      fd.append('section_key', sectionVal);
+      fd.append('is_active',   ($('#vf_active') || {}).checked ? 1 : 0);
+      fd.append('sort_order',  ($('#vf_order') || {}).value || 0);
+
+      if (type === 'youtube') {
+        var ytUrl = (($('#vf_youtube_url') || {}).value || '').trim();
+        if (!ytUrl) { toast('URL do YouTube é obrigatória', 'error'); return; }
+        fd.append('youtube_url', ytUrl);
+      } else {
+        var desktop = $('#vf_desktop_file');
+        var mobile  = $('#vf_mobile_file');
+        var poster  = $('#vf_poster_file');
+        if (desktop && desktop.files.length) fd.append('video_desktop', desktop.files[0]);
+        if (mobile  && mobile.files.length)  fd.append('video_mobile',  mobile.files[0]);
+        if (poster  && poster.files.length)  fd.append('poster',        poster.files[0]);
+        if (self.isNew && (!desktop || !desktop.files.length)) {
+          toast('Selecione um arquivo de vídeo desktop', 'error');
+          return;
+        }
+      }
+
+      var saveBtn = $('#vf_save');
+      if (saveBtn) { saveBtn.disabled = true; saveBtn.textContent = 'Salvando...'; }
+
+      // Usa POST para ambos (create e update) — PHP não lê $_FILES em PUT
+      var url = self.isNew ? '/videos' : '/videos/' + self.video.id + '/update';
+
+      api('POST', url, fd)
+        .then(function (res) {
+          if (res.success) {
+            toast(self.isNew ? 'Vídeo criado!' : 'Vídeo atualizado!', 'success');
+            Router.go('#/videos');
+          } else {
+            toast(res.message || 'Erro ao salvar', 'error');
+          }
+        })
+        .catch(function (err) {
+          toast('Erro: ' + (err.message || 'desconhecido'), 'error');
+        })
+        .then(function () {
+          var btn = $('#vf_save');
+          if (btn) { btn.disabled = false; btn.textContent = 'Salvar Vídeo'; }
+        });
+    }
+  };
+
+  /* ============================================================
      INIT
      ============================================================ */
   document.addEventListener('DOMContentLoaded', function () {
-    Auth.init();
 
     // Login form
     $('#loginForm').addEventListener('submit', function (e) {
