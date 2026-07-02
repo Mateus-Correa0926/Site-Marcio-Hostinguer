@@ -159,6 +159,29 @@ function getVideosBySection($db, $sectionKey) {
     );
     $stmt->execute([$sectionKey]);
     $row = $stmt->fetch();
+
+    // Auto-heal: se não houver ativo, promove o vídeo mais recente da seção
+    if (!$row) {
+        $fallbackStmt = $db->prepare(
+            "SELECT * FROM videos WHERE section_key = ?
+             ORDER BY updated_at DESC, id DESC
+             LIMIT 1"
+        );
+        $fallbackStmt->execute([$sectionKey]);
+        $fallback = $fallbackStmt->fetch();
+        if ($fallback) {
+            $db->prepare("UPDATE videos SET is_active = 1, updated_at = NOW() WHERE id = ?")
+               ->execute([(int)$fallback['id']]);
+            enforceSingleActiveVideoPerSection($db, $sectionKey, (int)$fallback['id']);
+
+            $reloadStmt = $db->prepare("SELECT * FROM videos WHERE id = ?");
+            $reloadStmt->execute([(int)$fallback['id']]);
+            $row = $reloadStmt->fetch();
+        }
+    }
+
+    header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
+    header('Pragma: no-cache');
     successResponse($row ? enrichVideo($row) : null);
 }
 

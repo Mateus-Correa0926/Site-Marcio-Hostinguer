@@ -65,10 +65,14 @@
 
         <nav class="sb-nav">
           <span class="sb-cat">Conteúdo</span>
-          <a href="#" class="sb-link is-active">
+          <a href="#videos" id="navVideos" class="sb-link is-active">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"><rect x="2" y="3" width="20" height="14" rx="2.5"/><path d="m8 21 4-4 4 4"/></svg>
             Vídeos do Site
             <span class="sb-badge" id="videoBadge">6</span>
+          </a>
+          <a href="#biblioteca" id="navLibrary" class="sb-link">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"><path d="M3 7a2 2 0 0 1 2-2h5l2 2h7a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7z"/></svg>
+            Biblioteca de Vídeos
           </a>
         </nav>
 
@@ -103,26 +107,52 @@
         </header>
 
         <main class="main-content">
-          <section id="videoPageTabs" class="content-tabs" aria-label="Páginas com vídeo">
-            <button class="ct-tab is-active" type="button" data-page="all">Todas as páginas</button>
+          <section id="videosView">
+            <section id="videoPageTabs" class="content-tabs" aria-label="Páginas com vídeo">
+              <button class="ct-tab is-active" type="button" data-page="all">Todas as páginas</button>
+            </section>
+
+            <section class="content-toolbar">
+              <div class="toolbar-actions">
+                <button id="importVideoBtn" class="btn btn-outline btn-sm" type="button">Ir para biblioteca</button>
+                <button id="addVideoBtn" class="btn btn-primary btn-sm" type="button">+ Novo Vídeo</button>
+              </div>
+              <div class="toolbar-meta">
+                <span id="videoCountInfo">0 espaços configurados</span>
+              </div>
+            </section>
+
+            <div id="videoGrid" class="video-grid">
+              <div class="grid-loading">
+                <div class="ld-dots"><span></span><span></span><span></span></div>
+                <p>Carregando vídeos...</p>
+              </div>
+            </div>
           </section>
 
-          <section class="content-toolbar">
-            <div class="toolbar-actions">
-              <button id="importVideoBtn" class="btn btn-outline btn-sm" type="button">Importar vídeo</button>
-              <button id="addVideoBtn" class="btn btn-primary btn-sm" type="button">+ Novo Vídeo</button>
+          <section id="libraryView" class="library-page" style="display:none;">
+            <div class="library-page__left">
+              <div class="library-page__head">
+                <h3>Vídeos importados</h3>
+                <button id="libraryRefreshBtn" class="btn btn-outline btn-sm" type="button">Atualizar lista</button>
+              </div>
+              <div id="libraryPageList" class="library-page__list"></div>
             </div>
-            <div class="toolbar-meta">
-              <span id="videoCountInfo">0 espaços configurados</span>
+            <div class="library-page__right">
+              <h3>Importar novo vídeo</h3>
+              <p class="library-page__hint">Envie o vídeo para uploads/videos e depois escolha esse arquivo na edição de uma seção.</p>
+              <div class="upload-zone" id="libraryDropZone">
+                <input type="file" id="libraryFileInput" accept="video/mp4,video/webm,video/quicktime,video/x-msvideo" />
+                <div class="upload-zone__icon">&#x1F4FD;</div>
+                <p class="upload-zone__text"><strong>Clique</strong> ou arraste um vídeo</p>
+                <p id="libraryFileName" class="upload-zone__name"></p>
+              </div>
+              <div class="library-page__actions">
+                <button id="libraryUploadBtn" class="btn btn-primary" type="button">Importar vídeo</button>
+              </div>
+              <p id="libraryUploadInfo" class="library-loading"></p>
             </div>
           </section>
-
-          <div id="videoGrid" class="video-grid">
-            <div class="grid-loading">
-              <div class="ld-dots"><span></span><span></span><span></span></div>
-              <p>Carregando vídeos...</p>
-            </div>
-          </div>
         </main>
       </div>
 

@@ -136,7 +136,8 @@
      VIDEO MANAGER
      ============================================================ */
   var videoData = {};
-    var pageFilter = 'all';
+  var pageFilter = 'all';
+  var currentView = 'videos';
   var libraryCache = [];
 
   function loadVideoLibrary() {
@@ -149,6 +150,41 @@
     });
   }
 
+  function switchView(view) {
+    currentView = view === 'library' ? 'library' : 'videos';
+    if (q('#videosView')) q('#videosView').style.display = currentView === 'videos' ? 'block' : 'none';
+    if (q('#libraryView')) q('#libraryView').style.display = currentView === 'library' ? 'grid' : 'none';
+    if (q('#navVideos')) q('#navVideos').classList.toggle('is-active', currentView === 'videos');
+    if (q('#navLibrary')) q('#navLibrary').classList.toggle('is-active', currentView === 'library');
+  }
+
+  function renderLibraryPage() {
+    var root = q('#libraryPageList');
+    if (!root) return;
+    if (!libraryCache.length) {
+      root.innerHTML = '<p class="library-loading">Nenhum vídeo encontrado em uploads/videos.</p>';
+      return;
+    }
+
+    root.innerHTML = libraryCache.map(function (item) {
+      var kb = Math.round((item.size || 0) / 1024);
+      return '' +
+        '<div class="library-card">' +
+          '<video src="' + esc(item.url) + '" muted playsinline preload="metadata"></video>' +
+          '<div class="library-card__body">' +
+            '<p class="library-card__name">' + esc(item.name || item.file_path) + '</p>' +
+            '<p class="library-card__meta">' + kb + ' KB</p>' +
+          '</div>' +
+        '</div>';
+    }).join('');
+  }
+
+  function loadLibraryPage() {
+    return loadVideoLibrary().then(function () {
+      renderLibraryPage();
+    });
+  }
+
   function loadVideos() {
     q('#videoGrid').innerHTML =
       '<div class="grid-loading">' +
@@ -158,7 +194,15 @@
     api('GET', '/videos')
       .then(function (res) {
         videoData = {};
-        (res.data || []).forEach(function (v) { videoData[v.section_key] = v; });
+        (res.data || []).forEach(function (v) {
+          if (!videoData[v.section_key]) {
+            videoData[v.section_key] = v;
+            return;
+          }
+          if (v.is_active == 1 && videoData[v.section_key].is_active != 1) {
+            videoData[v.section_key] = v;
+          }
+        });
         renderPageTabs();
         updateCounters();
         renderGrid();
@@ -443,19 +487,21 @@
     /* drop zone */
     var zone  = q('#sfDropZone');
     var fInput = q('#sfVideoFile');
-    zone.addEventListener('click',     function ()  { fInput.click(); });
-    zone.addEventListener('dragover',  function (e) { e.preventDefault(); zone.classList.add('upload-zone--drag'); });
-    zone.addEventListener('dragleave', function ()  { zone.classList.remove('upload-zone--drag'); });
-    zone.addEventListener('drop', function (e) {
-      e.preventDefault(); zone.classList.remove('upload-zone--drag');
-      if (e.dataTransfer.files.length) {
-        try { var dt = new DataTransfer(); dt.items.add(e.dataTransfer.files[0]); fInput.files = dt.files; } catch (x) {}
-        q('#sfDropName').textContent = e.dataTransfer.files[0].name;
-      }
-    });
-    fInput.addEventListener('change', function () {
-      if (this.files.length) q('#sfDropName').textContent = this.files[0].name;
-    });
+    if (zone && fInput) {
+      zone.addEventListener('click',     function ()  { fInput.click(); });
+      zone.addEventListener('dragover',  function (e) { e.preventDefault(); zone.classList.add('upload-zone--drag'); });
+      zone.addEventListener('dragleave', function ()  { zone.classList.remove('upload-zone--drag'); });
+      zone.addEventListener('drop', function (e) {
+        e.preventDefault(); zone.classList.remove('upload-zone--drag');
+        if (e.dataTransfer.files.length) {
+          try { var dt = new DataTransfer(); dt.items.add(e.dataTransfer.files[0]); fInput.files = dt.files; } catch (x) {}
+          if (q('#sfDropName')) q('#sfDropName').textContent = e.dataTransfer.files[0].name;
+        }
+      });
+      fInput.addEventListener('change', function () {
+        if (this.files.length && q('#sfDropName')) q('#sfDropName').textContent = this.files[0].name;
+      });
+    }
 
     q('#sfCancelBtn').addEventListener('click', function () { Modal.close(); });
     q('#sfSaveBtn').addEventListener('click',   function () { saveVideo(sectionKey, v); });
@@ -587,68 +633,106 @@
     /* Quick add */
     if (q('#addVideoBtn')) {
       q('#addVideoBtn').addEventListener('click', function () {
-        var firstEmpty = SECTIONS.find(function (sec) { return !videoData[sec.key]; });
-        openEditor((firstEmpty || SECTIONS[0]).key);
+        var options = SECTIONS.map(function (sec) {
+          return '<button class="btn btn-outline btn-sm js-open-sec" data-key="' + sec.key + '" type="button" style="justify-content:flex-start;width:100%;margin-bottom:8px">' + esc(sec.page + ' - ' + sec.label) + '</button>';
+        }).join('');
+        Modal.open('Escolha a seção para editar', '<div>' + options + '</div><div class="modal-footer"><button class="btn btn-outline btn-sm" id="pickClose">Fechar</button></div>');
+        qq('.js-open-sec').forEach(function (btn) {
+          btn.addEventListener('click', function () {
+            openEditor(this.dataset.key);
+          });
+        });
+        if (q('#pickClose')) q('#pickClose').addEventListener('click', function () { Modal.close(); });
       });
     }
 
     if (q('#importVideoBtn')) {
       q('#importVideoBtn').addEventListener('click', function () {
-        var html = '' +
-          '<div class="field"><label>Importar para biblioteca (uploads/videos)</label>' +
-            '<div class="upload-zone" id="impDropZone">' +
-              '<input type="file" id="impFile" accept="video/mp4,video/webm,video/quicktime,video/x-msvideo" />' +
-              '<div class="upload-zone__icon">&#x1F4FD;</div>' +
-              '<p class="upload-zone__text"><strong>Clique</strong> ou arraste um arquivo de vídeo</p>' +
-              '<p id="impFileName" class="upload-zone__name"></p>' +
-            '</div>' +
-          '</div>' +
-          '<div class="modal-footer">' +
-            '<button class="btn btn-outline btn-sm" id="impCancel">Cancelar</button>' +
-            '<button class="btn btn-primary btn-sm" id="impSave">Importar</button>' +
-          '</div>';
-
-        Modal.open('Importar vídeo', html);
-
-        var dz = q('#impDropZone');
-        var fi = q('#impFile');
-        var nameEl = q('#impFileName');
-
-        dz.addEventListener('click', function () { fi.click(); });
-        dz.addEventListener('dragover', function (e) { e.preventDefault(); dz.classList.add('upload-zone--drag'); });
-        dz.addEventListener('dragleave', function () { dz.classList.remove('upload-zone--drag'); });
-        dz.addEventListener('drop', function (e) {
-          e.preventDefault(); dz.classList.remove('upload-zone--drag');
-          if (!e.dataTransfer.files.length) return;
-          try { var dt = new DataTransfer(); dt.items.add(e.dataTransfer.files[0]); fi.files = dt.files; } catch (x) {}
-          nameEl.textContent = e.dataTransfer.files[0].name;
-        });
-        fi.addEventListener('change', function () {
-          nameEl.textContent = this.files.length ? this.files[0].name : '';
-        });
-
-        q('#impCancel').addEventListener('click', function () { Modal.close(); });
-        q('#impSave').addEventListener('click', function () {
-          if (!fi.files.length) { toast('Selecione um vídeo para importar', 'error'); return; }
-          var fd = new FormData();
-          fd.append('file', fi.files[0]);
-          var btn = q('#impSave');
-          btn.disabled = true;
-          btn.textContent = 'Importando...';
-          api('POST', '/videos/library-upload', fd)
-            .then(function (res) {
-              if (res.success) {
-                toast('Vídeo importado para biblioteca');
-                Modal.close();
-              } else {
-                toast(res.message || 'Erro ao importar', 'error');
-              }
-            })
-            .catch(function (e) {
-              toast('Erro: ' + (e.message || 'falha no upload'), 'error');
-            });
-        });
+        switchView('library');
+        loadLibraryPage();
       });
+    }
+
+    if (q('#navVideos')) {
+      q('#navVideos').addEventListener('click', function (e) {
+        e.preventDefault();
+        switchView('videos');
+      });
+    }
+
+    if (q('#navLibrary')) {
+      q('#navLibrary').addEventListener('click', function (e) {
+        e.preventDefault();
+        switchView('library');
+        loadLibraryPage();
+      });
+    }
+
+    if (q('#libraryRefreshBtn')) {
+      q('#libraryRefreshBtn').addEventListener('click', function () {
+        loadLibraryPage();
+      });
+    }
+
+    if (q('#libraryDropZone') && q('#libraryFileInput')) {
+      var lz = q('#libraryDropZone');
+      var li = q('#libraryFileInput');
+      var ln = q('#libraryFileName');
+      lz.addEventListener('click', function () { li.click(); });
+      lz.addEventListener('dragover', function (e) { e.preventDefault(); lz.classList.add('upload-zone--drag'); });
+      lz.addEventListener('dragleave', function () { lz.classList.remove('upload-zone--drag'); });
+      lz.addEventListener('drop', function (e) {
+        e.preventDefault(); lz.classList.remove('upload-zone--drag');
+        if (!e.dataTransfer.files.length) return;
+        try { var dt = new DataTransfer(); dt.items.add(e.dataTransfer.files[0]); li.files = dt.files; } catch (x) {}
+        if (ln) ln.textContent = e.dataTransfer.files[0].name;
+      });
+      li.addEventListener('change', function () {
+        if (ln) ln.textContent = this.files.length ? this.files[0].name : '';
+      });
+    }
+
+    if (q('#libraryUploadBtn')) {
+      q('#libraryUploadBtn').addEventListener('click', function () {
+        var input = q('#libraryFileInput');
+        if (!input || !input.files.length) { toast('Selecione um vídeo para importar', 'error'); return; }
+        var fd = new FormData();
+        fd.append('file', input.files[0]);
+        var btn = q('#libraryUploadBtn');
+        var info = q('#libraryUploadInfo');
+        btn.disabled = true;
+        btn.textContent = 'Importando...';
+        if (info) info.textContent = 'Enviando arquivo...';
+        api('POST', '/videos/library-upload', fd)
+          .then(function (res) {
+            if (res.success) {
+              toast('Vídeo importado com sucesso');
+              if (info) info.textContent = 'Importado! Agora edite uma seção e selecione este vídeo na biblioteca.';
+              if (input) input.value = '';
+              if (q('#libraryFileName')) q('#libraryFileName').textContent = '';
+              loadLibraryPage();
+            } else {
+              toast(res.message || 'Erro ao importar', 'error');
+              if (info) info.textContent = '';
+            }
+          })
+          .catch(function (e) {
+            toast('Erro: ' + (e.message || 'falha no upload'), 'error');
+            if (info) info.textContent = '';
+          })
+          .then(function () {
+            btn.disabled = false;
+            btn.textContent = 'Importar vídeo';
+          });
+      });
+    }
+
+    var route = (window.location.hash || '').replace('#', '').toLowerCase();
+    if (route === 'biblioteca' || route === 'library') {
+      switchView('library');
+      loadLibraryPage();
+    } else {
+      switchView('videos');
     }
 
     /* Modal close */
