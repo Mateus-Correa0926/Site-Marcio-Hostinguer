@@ -137,6 +137,17 @@
      ============================================================ */
   var videoData = {};
     var pageFilter = 'all';
+  var libraryCache = [];
+
+  function loadVideoLibrary() {
+    return api('GET', '/videos/library').then(function (res) {
+      libraryCache = (res && res.data) ? res.data : [];
+      return libraryCache;
+    }).catch(function () {
+      libraryCache = [];
+      return [];
+    });
+  }
 
   function loadVideos() {
     q('#videoGrid').innerHTML =
@@ -319,6 +330,8 @@
     var isYt = v && v.type === 'youtube';
     var ytVal = v && v.youtube_video_id ? 'https://www.youtube.com/watch?v=' + v.youtube_video_id : '';
 
+    var currentLibraryFile = (v && v.video_file_desktop) ? v.video_file_desktop : '';
+
     var html =
       '<div class="type-toggle">' +
         '<input type="radio" name="sfvtype" id="sfvt_up" value="upload" ' + (!isYt ? 'checked' : '') + '/>' +
@@ -327,6 +340,18 @@
         '<label for="sfvt_yt">YouTube</label>' +
       '</div>' +
       '<div id="sfUploadSec"' + (isYt ? ' style="display:none"' : '') + '>' +
+        '<div class="type-toggle" style="margin-bottom:12px">' +
+          '<input type="radio" name="sffilemode" id="sfmode_library" value="library" checked />' +
+          '<label for="sfmode_library">Biblioteca</label>' +
+          '<input type="radio" name="sffilemode" id="sfmode_upload" value="upload" />' +
+          '<label for="sfmode_upload">Importar novo</label>' +
+        '</div>' +
+        '<input type="hidden" id="sfLibraryPath" value="' + esc(currentLibraryFile) + '" />' +
+        '<div id="sfLibrarySec">' +
+          '<div id="sfLibraryList" class="library-grid"></div>' +
+          '<p id="sfLibraryMsg" class="library-loading">Carregando biblioteca...</p>' +
+        '</div>' +
+        '<div id="sfUploadNewSec" style="display:none">' +
         (v && v.video_url_desktop
           ? '<div class="current-preview"><video src="' + esc(v.video_url_desktop) + '" muted controls></video><p>Video atual</p></div>'
           : '') +
@@ -337,6 +362,7 @@
             '<p class="upload-zone__text"><strong>Clique</strong> ou arraste o arquivo aqui</p>' +
             '<p id="sfDropName" class="upload-zone__name"></p>' +
           '</div>' +
+        '</div>' +
         '</div>' +
       '</div>' +
       '<div id="sfYtSec"' + (!isYt ? ' style="display:none"' : '') + '>' +
@@ -366,6 +392,53 @@
         q('#sfYtSec').style.display     = isY ? 'block' : 'none';
       });
     });
+
+    function renderLibraryCards() {
+      var list = q('#sfLibraryList');
+      var msg = q('#sfLibraryMsg');
+      var current = (q('#sfLibraryPath') || {}).value || '';
+      if (!list || !msg) return;
+
+      if (!libraryCache.length) {
+        list.innerHTML = '';
+        msg.textContent = 'Nenhum vídeo importado na pasta uploads/videos.';
+        return;
+      }
+
+      msg.textContent = 'Escolha um vídeo da pasta:';
+      list.innerHTML = libraryCache.map(function (item) {
+        var selected = current === item.file_path ? ' is-selected' : '';
+        return '' +
+          '<div class="library-card' + selected + '" data-path="' + esc(item.file_path) + '">' +
+            '<video src="' + esc(item.url) + '" muted playsinline preload="metadata"></video>' +
+            '<div class="library-card__body">' +
+              '<p class="library-card__name">' + esc(item.name || item.file_path) + '</p>' +
+            '</div>' +
+          '</div>';
+      }).join('');
+
+      qq('.library-card', list).forEach(function (card) {
+        card.addEventListener('click', function () {
+          var path = this.dataset.path || '';
+          if (q('#sfLibraryPath')) q('#sfLibraryPath').value = path;
+          qq('.library-card', list).forEach(function (c) { c.classList.remove('is-selected'); });
+          this.classList.add('is-selected');
+        });
+      });
+    }
+
+    function toggleFileMode() {
+      var modeEl = document.querySelector('[name="sffilemode"]:checked');
+      var mode = modeEl ? modeEl.value : 'library';
+      if (q('#sfLibrarySec')) q('#sfLibrarySec').style.display = mode === 'library' ? 'block' : 'none';
+      if (q('#sfUploadNewSec')) q('#sfUploadNewSec').style.display = mode === 'upload' ? 'block' : 'none';
+    }
+
+    qq('[name="sffilemode"]').forEach(function (radio) {
+      radio.addEventListener('change', toggleFileMode);
+    });
+    toggleFileMode();
+    loadVideoLibrary().then(renderLibraryCards);
 
     /* drop zone */
     var zone  = q('#sfDropZone');
@@ -404,11 +477,23 @@
       if (!ytUrl) { toast('URL do YouTube e obrigatoria', 'error'); return; }
       fd.append('youtube_url', ytUrl);
     } else {
+      var fileModeEl = document.querySelector('[name="sffilemode"]:checked');
+      var fileMode = fileModeEl ? fileModeEl.value : 'library';
       var fi = q('#sfVideoFile');
-      if (fi && fi.files.length) {
-        fd.append('video_desktop', fi.files[0]);
-      } else if (!existing) {
-        toast('Selecione um arquivo de video', 'error'); return;
+      var selectedPath = ((q('#sfLibraryPath') || {}).value || '').trim();
+
+      if (fileMode === 'upload') {
+        if (fi && fi.files.length) {
+          fd.append('video_desktop', fi.files[0]);
+        } else if (!existing) {
+          toast('Selecione um arquivo para importar', 'error'); return;
+        }
+      } else {
+        if (selectedPath) {
+          fd.append('video_library_desktop', selectedPath);
+        } else if (!existing) {
+          toast('Selecione um vídeo da biblioteca', 'error'); return;
+        }
       }
     }
 
@@ -504,6 +589,65 @@
       q('#addVideoBtn').addEventListener('click', function () {
         var firstEmpty = SECTIONS.find(function (sec) { return !videoData[sec.key]; });
         openEditor((firstEmpty || SECTIONS[0]).key);
+      });
+    }
+
+    if (q('#importVideoBtn')) {
+      q('#importVideoBtn').addEventListener('click', function () {
+        var html = '' +
+          '<div class="field"><label>Importar para biblioteca (uploads/videos)</label>' +
+            '<div class="upload-zone" id="impDropZone">' +
+              '<input type="file" id="impFile" accept="video/mp4,video/webm,video/quicktime,video/x-msvideo" />' +
+              '<div class="upload-zone__icon">&#x1F4FD;</div>' +
+              '<p class="upload-zone__text"><strong>Clique</strong> ou arraste um arquivo de vídeo</p>' +
+              '<p id="impFileName" class="upload-zone__name"></p>' +
+            '</div>' +
+          '</div>' +
+          '<div class="modal-footer">' +
+            '<button class="btn btn-outline btn-sm" id="impCancel">Cancelar</button>' +
+            '<button class="btn btn-primary btn-sm" id="impSave">Importar</button>' +
+          '</div>';
+
+        Modal.open('Importar vídeo', html);
+
+        var dz = q('#impDropZone');
+        var fi = q('#impFile');
+        var nameEl = q('#impFileName');
+
+        dz.addEventListener('click', function () { fi.click(); });
+        dz.addEventListener('dragover', function (e) { e.preventDefault(); dz.classList.add('upload-zone--drag'); });
+        dz.addEventListener('dragleave', function () { dz.classList.remove('upload-zone--drag'); });
+        dz.addEventListener('drop', function (e) {
+          e.preventDefault(); dz.classList.remove('upload-zone--drag');
+          if (!e.dataTransfer.files.length) return;
+          try { var dt = new DataTransfer(); dt.items.add(e.dataTransfer.files[0]); fi.files = dt.files; } catch (x) {}
+          nameEl.textContent = e.dataTransfer.files[0].name;
+        });
+        fi.addEventListener('change', function () {
+          nameEl.textContent = this.files.length ? this.files[0].name : '';
+        });
+
+        q('#impCancel').addEventListener('click', function () { Modal.close(); });
+        q('#impSave').addEventListener('click', function () {
+          if (!fi.files.length) { toast('Selecione um vídeo para importar', 'error'); return; }
+          var fd = new FormData();
+          fd.append('file', fi.files[0]);
+          var btn = q('#impSave');
+          btn.disabled = true;
+          btn.textContent = 'Importando...';
+          api('POST', '/videos/library-upload', fd)
+            .then(function (res) {
+              if (res.success) {
+                toast('Vídeo importado para biblioteca');
+                Modal.close();
+              } else {
+                toast(res.message || 'Erro ao importar', 'error');
+              }
+            })
+            .catch(function (e) {
+              toast('Erro: ' + (e.message || 'falha no upload'), 'error');
+            });
+        });
       });
     }
 

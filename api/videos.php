@@ -21,6 +21,18 @@ function handleVideos($method, $id, $action, $currentUser) {
         return;
     }
 
+    // Biblioteca de vídeos importados (admin)
+    if ($method === 'GET' && $id === 'library') {
+        if (!$currentUser) errorResponse('Não autorizado', 401);
+        getVideoLibrary();
+        return;
+    }
+    if ($method === 'POST' && $id === 'library-upload') {
+        if (!$currentUser) errorResponse('Não autorizado', 401);
+        uploadVideoToLibrary();
+        return;
+    }
+
     // Todas as outras rotas requerem autenticação
     if (!$currentUser) {
         errorResponse('Não autorizado', 401);
@@ -142,14 +154,52 @@ function getVideosBySection($db, $sectionKey) {
     }
     $stmt = $db->prepare(
         "SELECT * FROM videos WHERE section_key = ? AND is_active = 1
-         ORDER BY sort_order ASC, id ASC"
+         ORDER BY updated_at DESC, id DESC
+         LIMIT 1"
     );
     $stmt->execute([$sectionKey]);
-    $rows = $stmt->fetchAll();
-    foreach ($rows as &$row) {
-        $row = enrichVideo($row);
+    $row = $stmt->fetch();
+    successResponse($row ? enrichVideo($row) : null);
+}
+
+function getVideoLibrary() {
+    $dir = rtrim(UPLOAD_DIR, '/\\') . DIRECTORY_SEPARATOR . 'videos';
+    if (!is_dir($dir)) {
+        successResponse([]);
     }
-    successResponse($rows);
+
+    $files = glob($dir . DIRECTORY_SEPARATOR . '*.{mp4,webm,mov,avi}', GLOB_BRACE);
+    $items = [];
+
+    foreach ($files as $path) {
+        if (!is_file($path)) continue;
+        $name = basename($path);
+        $items[] = [
+            'name' => $name,
+            'file_path' => 'videos/' . $name,
+            'url' => UPLOAD_URL . 'videos/' . rawurlencode($name),
+            'size' => filesize($path),
+            'updated_at' => date('c', filemtime($path)),
+        ];
+    }
+
+    usort($items, function ($a, $b) {
+        return strcmp($b['updated_at'], $a['updated_at']);
+    });
+
+    successResponse($items);
+}
+
+function uploadVideoToLibrary() {
+    if (!isset($_FILES['file']) || $_FILES['file']['error'] !== UPLOAD_ERR_OK) {
+        errorResponse('Arquivo de vídeo é obrigatório', 400);
+    }
+
+    $filePath = uploadVideoFile('file');
+    successResponse([
+        'file_path' => $filePath,
+        'url' => UPLOAD_URL . $filePath,
+    ], 'Vídeo importado com sucesso', 201);
 }
 
 /* ============================================================
@@ -189,10 +239,20 @@ function createVideo($db) {
         }
     } else {
         // Upload obrigatório para desktop
-        if (!isset($_FILES['video_desktop']) || $_FILES['video_desktop']['error'] !== UPLOAD_ERR_OK) {
+        $libraryFile = trim($_POST['video_library_desktop'] ?? '');
+        if ($libraryFile !== '') {
+            if (!preg_match('/^videos\/[a-zA-Z0-9_\-.]+$/', $libraryFile)) {
+                errorResponse('Arquivo da biblioteca inválido', 400);
+            }
+            if (!file_exists(UPLOAD_DIR . $libraryFile)) {
+                errorResponse('Arquivo da biblioteca não encontrado', 404);
+            }
+            $videoFileDesktop = $libraryFile;
+        } elseif (!isset($_FILES['video_desktop']) || $_FILES['video_desktop']['error'] !== UPLOAD_ERR_OK) {
             errorResponse('Arquivo de vídeo desktop é obrigatório', 400);
+        } else {
+            $videoFileDesktop = uploadVideoFile('video_desktop');
         }
-        $videoFileDesktop = uploadVideoFile('video_desktop');
 
         // Mobile opcional
         if (isset($_FILES['video_mobile']) && $_FILES['video_mobile']['error'] === UPLOAD_ERR_OK) {
@@ -269,6 +329,16 @@ function updateVideo($db, $id) {
         $videoFileDesktop = null;
         $videoFileMobile  = null;
     } else {
+        $libraryFile = trim($_POST['video_library_desktop'] ?? '');
+        if ($libraryFile !== '') {
+            if (!preg_match('/^videos\/[a-zA-Z0-9_\-.]+$/', $libraryFile)) {
+                errorResponse('Arquivo da biblioteca inválido', 400);
+            }
+            if (!file_exists(UPLOAD_DIR . $libraryFile)) {
+                errorResponse('Arquivo da biblioteca não encontrado', 404);
+            }
+            $videoFileDesktop = $libraryFile;
+        }
         // Substituir arquivos se enviados
         if (isset($_FILES['video_desktop']) && $_FILES['video_desktop']['error'] === UPLOAD_ERR_OK) {
             $videoFileDesktop = uploadVideoFile('video_desktop');
