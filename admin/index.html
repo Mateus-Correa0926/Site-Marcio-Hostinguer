@@ -5,6 +5,81 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Admin — Stornoway Films</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/admin/css/admin.css" />
+</head>
+<body>
+
+  <!-- LOGIN -->
+  <div id="loginScreen" class="login-screen">
+    <div class="login-card">
+      <div class="login-logo">Stornoway Films</div>
+      <div class="login-sub">Painel Administrativo</div>
+      <div id="loginError" class="login-error"></div>
+      <form id="loginForm">
+        <div class="field">
+          <label>Usuário</label>
+          <input type="text" id="loginUser" autocomplete="username" required />
+        </div>
+        <div class="field">
+          <label>Senha</label>
+          <input type="password" id="loginPass" autocomplete="current-password" required />
+        </div>
+        <button type="submit" class="btn btn-black btn-block">Entrar</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- APP -->
+  <div id="appLayout" class="app-layout" style="display:none;">
+    <header class="app-header">
+      <div class="app-header__brand">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><polygon points="10 8 16 12 10 16 10 8" fill="currentColor" stroke="none"/></svg>
+        <span>Gerenciador de Vídeos</span>
+      </div>
+      <div class="app-header__right">
+        <a href="/" target="_blank" class="app-header__link">Ver site ↗</a>
+        <span id="headerUser" class="app-header__user"></span>
+        <button id="logoutBtn" class="btn btn-ghost">Sair</button>
+      </div>
+    </header>
+
+    <main class="app-main">
+      <div class="page-header">
+        <div>
+          <h1 class="page-title">Vídeos do Site</h1>
+          <p class="page-desc">Cada card representa um espaço de vídeo nas páginas do site. Clique para adicionar ou editar.</p>
+        </div>
+        <button id="refreshBtn" class="btn btn-outline btn-sm">↺ Atualizar</button>
+      </div>
+      <div id="videoGrid" class="video-grid">
+        <div class="grid-loading">Carregando vídeos...</div>
+      </div>
+    </main>
+  </div>
+
+  <!-- MODAL -->
+  <div id="modalOverlay" class="modal-overlay">
+    <div id="modalBox" class="modal-box">
+      <div class="modal-header">
+        <h3 id="modalTitle"></h3>
+        <button id="modalClose" class="modal-close" aria-label="Fechar">✕</button>
+      </div>
+      <div id="modalBody" class="modal-body"></div>
+    </div>
+  </div>
+
+  <!-- TOAST -->
+  <div id="toastContainer" class="toast-container"></div>
+
+  <!-- CONFIRM -->
+  <div id="confirmOverlay" class="confirm-overlay" style="display:none;"></div>
+
+  <script src="/admin/js/app.js"></script>
+</body>
+</html>
+  <title>Admin — Stornoway Films</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="/admin/css/admin.css" />

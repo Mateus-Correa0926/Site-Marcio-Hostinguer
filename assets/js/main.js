@@ -322,4 +322,54 @@
       }
     });
   }
+
+  /* ---- Video Loader (API-driven hero videos) ---- */
+  (function () {
+    var containers = document.querySelectorAll('[data-video-section]');
+    if (!containers.length) return;
+
+    function applyVideo(container, data) {
+      if (!data) return;
+      var vid = container.querySelector('video');
+      if (data.type === 'youtube' && data.embed_url) {
+        /* Replace video element with muted autoplay iframe */
+        var iframe = document.createElement('iframe');
+        iframe.src = data.embed_url;
+        iframe.setAttribute('frameborder', '0');
+        iframe.setAttribute('allow', 'autoplay; fullscreen');
+        iframe.setAttribute('allowfullscreen', '');
+        iframe.style.cssText = 'position:absolute;inset:0;width:100%;height:100%;object-fit:cover;border:none;pointer-events:none;';
+        if (vid) {
+          vid.parentNode.replaceChild(iframe, vid);
+        } else {
+          container.insertBefore(iframe, container.firstChild);
+        }
+      } else if (data.type === 'upload' && data.video_url_desktop) {
+        /* Update existing video src */
+        if (vid && vid.getAttribute('src') !== data.video_url_desktop) {
+          vid.src = data.video_url_desktop;
+          vid.load();
+          var p = vid.play();
+          if (p && typeof p.catch === 'function') p.catch(function () {});
+        }
+      }
+    }
+
+    /* Fetch each unique section in parallel */
+    var fetched = {};
+    for (var ci = 0; ci < containers.length; ci++) {
+      (function (container) {
+        var key = container.getAttribute('data-video-section');
+        if (!key || fetched[key]) return;
+        fetched[key] = true;
+        fetch('/api/videos/section/' + encodeURIComponent(key))
+          .then(function (r) { return r.ok ? r.json() : null; })
+          .then(function (res) {
+            if (res && res.success && res.data) applyVideo(container, res.data);
+          })
+          .catch(function () { /* keep hardcoded src */ });
+      })(containers[ci]);
+    }
+  })();
+
 })();
