@@ -3,71 +3,128 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Admin — Stornoway Films</title>
+  <title>Stornoway Films — Admin</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="/admin/css/admin.css" />
 </head>
 <body>
 
+  <!-- ─── LOGIN ──────────────────────────────────────────── -->
   <div id="loginScreen" class="login-screen">
-    <div class="login-card">
-      <div class="login-logo">Stornoway Films</div>
-      <div class="login-sub">Painel Administrativo</div>
-      <div id="loginError" class="login-error"></div>
-      <form id="loginForm">
-        <div class="field">
-          <label>Usuário</label>
-          <input type="text" id="loginUser" autocomplete="username" required />
+    <div class="login-visual">
+      <div class="login-visual__text">
+        <div class="lv-logo">
+          <svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10.5" stroke="currentColor" stroke-width="1.25"/><polygon points="10 8 16 12 10 16" fill="currentColor"/></svg>
         </div>
-        <div class="field">
-          <label>Senha</label>
-          <input type="password" id="loginPass" autocomplete="current-password" required />
+        <h2 class="lv-title">Stornoway Films</h2>
+        <p class="lv-sub">Gestão de vídeos cinematográficos</p>
+      </div>
+    </div>
+    <div class="login-panel">
+      <div class="login-card">
+        <div class="lc-brand">
+          <div class="lc-mark">
+            <svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10.5" stroke="currentColor" stroke-width="1.25"/><polygon points="10 8 16 12 10 16" fill="currentColor"/></svg>
+          </div>
+          <h1 class="lc-name">Stornoway Films</h1>
+          <p class="lc-tag">Área Administrativa</p>
         </div>
-        <button type="submit" class="btn btn-black btn-block">Entrar</button>
-      </form>
+        <div id="loginError" class="login-error" role="alert"></div>
+        <form id="loginForm" novalidate>
+          <div class="field">
+            <label for="loginUser">Usuário</label>
+            <input type="text" id="loginUser" placeholder="nome de usuário" autocomplete="username" />
+          </div>
+          <div class="field">
+            <label for="loginPass">Senha</label>
+            <input type="password" id="loginPass" placeholder="••••••••" autocomplete="current-password" />
+          </div>
+          <button type="submit" id="loginBtn" class="btn btn-primary btn-block" style="margin-top:8px">
+            <span id="loginBtnText">Entrar</span>
+            <svg id="loginSpinner" class="spin" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="display:none;width:16px;height:16px"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg>
+          </button>
+        </form>
+      </div>
     </div>
   </div>
 
-  <div id="appLayout" class="app-layout" style="display:none;">
-    <header class="app-header">
-      <div class="app-header__brand">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><polygon points="10 8 16 12 10 16 10 8" fill="currentColor" stroke="none"/></svg>
-        <span>Gerenciador de Vídeos</span>
-      </div>
-      <div class="app-header__right">
-        <a href="/" target="_blank" class="app-header__link">Ver site ↗</a>
-        <span id="headerUser" class="app-header__user"></span>
-        <button id="logoutBtn" class="btn btn-ghost">Sair</button>
-      </div>
-    </header>
+  <!-- ─── APP ────────────────────────────────────────────── -->
+  <div id="appLayout" class="app-layout" style="display:none">
 
-    <main class="app-main">
-      <div class="page-header">
-        <div>
-          <h1 class="page-title">Vídeos do Site</h1>
-          <p class="page-desc">Cada card representa um espaço de vídeo nas páginas do site. Clique para adicionar ou editar.</p>
+    <aside id="sidebar" class="sidebar">
+      <div class="sb-brand">
+        <div class="sb-logo">
+          <svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10.5" stroke="currentColor" stroke-width="1.25"/><polygon points="10 8 16 12 10 16" fill="currentColor"/></svg>
         </div>
-        <button id="refreshBtn" class="btn btn-outline btn-sm">↺ Atualizar</button>
+        <div>
+          <span class="sb-name">Stornoway</span>
+          <span class="sb-sub">Films Admin</span>
+        </div>
       </div>
-      <div id="videoGrid" class="video-grid">
-        <div class="grid-loading">Carregando vídeos...</div>
+      <nav class="sb-nav">
+        <span class="sb-cat">Conteúdo</span>
+        <a href="#" class="sb-link is-active">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"><rect x="2" y="3" width="20" height="14" rx="2.5"/><path d="m8 21 4-4 4 4"/></svg>
+          Vídeos do Site
+          <span class="sb-badge" id="videoBadge">6</span>
+        </a>
+      </nav>
+      <div class="sb-foot">
+        <a href="/" target="_blank" rel="noopener" class="sb-foot-link">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+          Ver site
+        </a>
+        <button id="logoutBtn" class="sb-foot-link sb-logout">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+          <span>Sair</span>
+          <span id="sidebarUser" class="sb-username"></span>
+        </button>
       </div>
-    </main>
+    </aside>
+
+    <div class="main-wrap">
+      <header class="main-header">
+        <button id="menuToggle" class="menu-toggle" aria-label="Abrir menu">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+        </button>
+        <div class="mh-info">
+          <h1 class="mh-title">Gerenciador de Vídeos</h1>
+          <p class="mh-desc">Gerencie os vídeos de cada seção do site</p>
+        </div>
+        <button id="refreshBtn" class="btn btn-ghost btn-sm">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-3.44"/></svg>
+          Atualizar
+        </button>
+      </header>
+      <main class="main-content">
+        <div id="videoGrid" class="video-grid">
+          <div class="grid-loading">
+            <div class="ld-dots"><span></span><span></span><span></span></div>
+            <p>Carregando vídeos…</p>
+          </div>
+        </div>
+      </main>
+    </div>
+
+    <div id="sidebarBackdrop" class="sb-backdrop"></div>
   </div>
 
-  <div id="modalOverlay" class="modal-overlay">
+  <!-- ─── MODAL ──────────────────────────────────────────── -->
+  <div id="modalOverlay" class="modal-overlay" role="dialog" aria-modal="true">
     <div id="modalBox" class="modal-box">
-      <div class="modal-header">
-        <h3 id="modalTitle"></h3>
-        <button id="modalClose" class="modal-close" aria-label="Fechar">✕</button>
+      <div class="modal-head">
+        <h3 id="modalTitle" class="modal-head__title"></h3>
+        <button id="modalClose" class="modal-close" aria-label="Fechar">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
       </div>
       <div id="modalBody" class="modal-body"></div>
     </div>
   </div>
 
-  <div id="toastContainer" class="toast-container"></div>
-  <div id="confirmOverlay" class="confirm-overlay" style="display:none;"></div>
+  <div id="toastContainer" class="toast-wrap"></div>
+  <div id="confirmOverlay" class="confirm-overlay" style="display:none"></div>
 
   <script src="/admin/js/app.js"></script>
 </body>

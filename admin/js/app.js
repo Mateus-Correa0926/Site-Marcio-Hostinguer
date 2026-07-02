@@ -1,28 +1,30 @@
 ﻿/* ============================================================
-   Stornoway Films — Admin Video Manager
-   Minimal, auth + video grid only
+   Stornoway Films — Admin Video Manager  |  Premium Edition
    ============================================================ */
 (function () {
   'use strict';
 
   var API = '/api';
 
-  /* Site video sections — must match DB section_key values */
   var SECTIONS = [
-    { key: 'home_banner',     label: 'Banner Principal',    page: 'Início',       fallback: '/uploads/videos/HomeSite.mp4' },
-    { key: 'about_hero',      label: 'Sobre — Hero',        page: 'Sobre',        fallback: '/uploads/videos/download%20(1).mp4' },
-    { key: 'films_hero',      label: 'Filmes — Hero',       page: 'Filmes',       fallback: '/uploads/videos/download.mp4' },
-    { key: 'experience_hero', label: 'Experiência — Hero',  page: 'Experiência',  fallback: '/uploads/videos/download%20(2).mp4' },
-    { key: 'featured_hero',   label: 'Destaques — Hero',    page: 'Destaques',    fallback: '/uploads/videos/download%20(1).mp4' },
-    { key: 'contact_hero',    label: 'Contato — Hero',      page: 'Contato',      fallback: '/uploads/videos/download%20(2).mp4' }
+    { key: 'home_banner',     label: 'Banner Principal',   page: 'Inicio',      fallback: '/uploads/videos/HomeSite.mp4' },
+    { key: 'about_hero',      label: 'Sobre - Hero',       page: 'Sobre',       fallback: '/uploads/videos/download%20(1).mp4' },
+    { key: 'films_hero',      label: 'Filmes - Hero',      page: 'Filmes',      fallback: '/uploads/videos/download.mp4' },
+    { key: 'experience_hero', label: 'Experiencia - Hero', page: 'Experiencia', fallback: '/uploads/videos/download%20(2).mp4' },
+    { key: 'featured_hero',   label: 'Destaques - Hero',   page: 'Destaques',   fallback: '/uploads/videos/download%20(1).mp4' },
+    { key: 'contact_hero',    label: 'Contato - Hero',     page: 'Contato',     fallback: '/uploads/videos/download%20(2).mp4' }
   ];
 
-  /* ── Utils ────────────────────────────────────────── */
-  function $(sel, ctx) { return (ctx || document).querySelector(sel); }
-  function $$(sel, ctx) { return Array.from((ctx || document).querySelectorAll(sel)); }
-  function esc(s) { var d = document.createElement('div'); d.textContent = s || ''; return d.innerHTML; }
+  /* ── Helpers ──────────────────────────────────────────────── */
+  function q(sel, ctx)  { return (ctx || document).querySelector(sel); }
+  function qq(sel, ctx) { return Array.from((ctx || document).querySelectorAll(sel)); }
+  function esc(s) {
+    var d = document.createElement('div');
+    d.textContent = String(s || '');
+    return d.innerHTML;
+  }
 
-  /* ── Auth ─────────────────────────────────────────── */
+  /* ── Auth ─────────────────────────────────────────────────── */
   var Auth = {
     token: null, user: null,
     init: function () {
@@ -42,78 +44,104 @@
     }
   };
 
-  /* ── API client ───────────────────────────────────── */
+  /* ── API Client ───────────────────────────────────────────── */
   function api(method, path, body) {
     var opts = { method: method, headers: {} };
     if (Auth.token) opts.headers['Authorization'] = 'Bearer ' + Auth.token;
     if (body && !(body instanceof FormData)) {
       opts.headers['Content-Type'] = 'application/json';
       opts.body = JSON.stringify(body);
-    } else if (body) {
+    } else if (body instanceof FormData) {
       opts.body = body;
     }
     return fetch(API + path, opts).then(function (r) {
-      if (r.status === 401) { Auth.logout(); showLogin(); return Promise.reject(new Error('Sessão expirada')); }
+      if (r.status === 401) { Auth.logout(); showLogin(); return Promise.reject(new Error('Sessao expirada')); }
       return r.json();
     });
   }
 
-  /* ── Toast ────────────────────────────────────────── */
+  /* ── Toast ────────────────────────────────────────────────── */
   function toast(msg, type) {
     var el = document.createElement('div');
     el.className = 'toast' + (type === 'error' ? ' toast--error' : '');
     el.textContent = msg;
-    $('#toastContainer').appendChild(el);
-    setTimeout(function () { if (el.parentNode) el.remove(); }, 3500);
+    q('#toastContainer').appendChild(el);
+    setTimeout(function () {
+      el.classList.add('toast--out');
+      setTimeout(function () { if (el.parentNode) el.remove(); }, 220);
+    }, 3200);
   }
 
-  /* ── Confirm ──────────────────────────────────────── */
+  /* ── Confirm ──────────────────────────────────────────────── */
   function sfConfirm(title, text) {
     return new Promise(function (resolve) {
-      var ov = $('#confirmOverlay');
+      var ov = q('#confirmOverlay');
       ov.style.display = 'flex';
       ov.innerHTML =
         '<div class="confirm-box">' +
+          '<div class="confirm-icon">' +
+            '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>' +
+          '</div>' +
           '<h3>' + esc(title) + '</h3>' +
           '<p>' + esc(text) + '</p>' +
           '<div class="confirm-box__actions">' +
-            '<button class="btn btn-outline" id="cfNo">Cancelar</button>' +
-            '<button class="btn btn-danger" id="cfYes">Confirmar</button>' +
+            '<button class="btn btn-outline btn-sm" id="cfNo">Cancelar</button>' +
+            '<button class="btn btn-danger btn-sm" id="cfYes">Remover</button>' +
           '</div>' +
         '</div>';
-      $('#cfYes').onclick = function () { ov.style.display = 'none'; resolve(true); };
-      $('#cfNo').onclick  = function () { ov.style.display = 'none'; resolve(false); };
+      q('#cfYes').onclick = function () { ov.style.display = 'none'; resolve(true); };
+      q('#cfNo').onclick  = function () { ov.style.display = 'none'; resolve(false); };
     });
   }
 
-  /* ── Modal ────────────────────────────────────────── */
+  /* ── Modal ────────────────────────────────────────────────── */
   var Modal = {
     open: function (title, html) {
-      $('#modalTitle').textContent = title;
-      $('#modalBody').innerHTML = html;
-      $('#modalOverlay').classList.add('modal-overlay--open');
+      q('#modalTitle').textContent = title;
+      q('#modalBody').innerHTML    = html;
+      q('#modalOverlay').classList.add('modal-overlay--open');
     },
-    close: function () { $('#modalOverlay').classList.remove('modal-overlay--open'); }
+    close: function () { q('#modalOverlay').classList.remove('modal-overlay--open'); }
   };
 
-  /* ── Auth screens ─────────────────────────────────── */
+  /* ── Screen Helpers ───────────────────────────────────────── */
   function showLogin() {
-    $('#loginScreen').style.display = 'flex';
-    $('#appLayout').style.display = 'none';
+    q('#loginScreen').style.display = 'flex';
+    q('#appLayout').style.display   = 'none';
+    if (q('#loginUser')) q('#loginUser').value = '';
+    if (q('#loginPass')) q('#loginPass').value = '';
   }
+
   function showApp() {
-    $('#loginScreen').style.display = 'none';
-    $('#appLayout').style.display = 'block';
-    $('#headerUser').textContent = Auth.user ? Auth.user.username : '';
+    q('#loginScreen').style.display = 'none';
+    q('#appLayout').style.display   = 'flex';
+    var user = Auth.user;
+    if (user && q('#sidebarUser')) q('#sidebarUser').textContent = user.username || '';
+  }
+
+  /* ── Mobile Sidebar ───────────────────────────────────────── */
+  function openSidebar() {
+    q('#sidebar').classList.add('is-open');
+    q('#sidebarBackdrop').classList.add('is-open');
+    document.body.style.overflow = 'hidden';
+  }
+  function closeSidebar() {
+    q('#sidebar').classList.remove('is-open');
+    q('#sidebarBackdrop').classList.remove('is-open');
+    document.body.style.overflow = '';
   }
 
   /* ============================================================
      VIDEO MANAGER
      ============================================================ */
-  var videoData = {}; /* section_key → video record | null */
+  var videoData = {};
 
   function loadVideos() {
-    $('#videoGrid').innerHTML = '<div class="grid-loading">Carregando vídeos...</div>';
+    q('#videoGrid').innerHTML =
+      '<div class="grid-loading">' +
+        '<div class="ld-dots"><span></span><span></span><span></span></div>' +
+        '<p>Carregando videos...</p>' +
+      '</div>';
     api('GET', '/videos')
       .then(function (res) {
         videoData = {};
@@ -121,78 +149,95 @@
         renderGrid();
       })
       .catch(function () {
-        $('#videoGrid').innerHTML = '<div class="grid-loading">Erro ao carregar. Verifique a conexão.</div>';
+        q('#videoGrid').innerHTML =
+          '<div class="grid-loading"><p style="color:var(--red)">Erro ao carregar. Verifique a conexao com a API.</p></div>';
       });
   }
 
   function renderGrid() {
-    $('#videoGrid').innerHTML = SECTIONS.map(renderCard).join('');
-    /* bind actions */
-    $$('.js-edit').forEach(function (b) {
+    q('#videoGrid').innerHTML = SECTIONS.map(renderCard).join('');
+    qq('.js-edit').forEach(function (b) {
       b.addEventListener('click', function () { openEditor(this.dataset.key); });
     });
-    $$('.js-toggle').forEach(function (b) {
+    qq('.js-toggle').forEach(function (b) {
       b.addEventListener('click', function () { toggleVideo(this.dataset.id); });
     });
-    $$('.js-remove').forEach(function (b) {
+    qq('.js-remove').forEach(function (b) {
       b.addEventListener('click', function () { removeVideo(this.dataset.key); });
+    });
+    qq('.vc-empty[data-key]').forEach(function (el) {
+      el.addEventListener('click', function () { openEditor(this.dataset.key); });
     });
   }
 
-  function renderCard(sec) {
-    var v  = videoData[sec.key] || null;
-    var hasFallback = !v; /* no DB record — show hardcoded fallback video */
+  function statusPill(isActive) {
+    var on = isActive == 1;
+    return (
+      '<div class="vc-pill">' +
+        '<span class="vc-pill__dot' + (on ? '' : ' vc-pill__dot--off') + '"></span>' +
+        '<span class="vc-pill__label">' + (on ? 'Ativo' : 'Inativo') + '</span>' +
+      '</div>'
+    );
+  }
 
-    /* ── preview ── */
+  function renderCard(sec) {
+    var v = videoData[sec.key] || null;
+    var noRecord = !v;
+
+    /* preview */
     var preview = '';
     if (v && v.type === 'youtube' && v.youtube_video_id) {
       preview =
         '<div class="vc-preview">' +
           '<img src="https://img.youtube.com/vi/' + esc(v.youtube_video_id) + '/mqdefault.jpg" alt="" />' +
-          '<span class="vc-badge">YouTube</span>' +
-          '<span class="vc-status' + (v.is_active == 1 ? '' : ' vc-status--off') + '"></span>' +
-          '<div class="vc-overlay">' +
-            '<button class="btn btn-outline btn-sm js-edit" data-key="' + sec.key + '" style="color:#fff;border-color:rgba(255,255,255,.5)">Editar</button>' +
+          '<span class="vc-badge vc-badge--yt">YouTube</span>' +
+          statusPill(v.is_active) +
+          '<div class="vc-hover">' +
+            '<button class="btn btn-outline btn-sm js-edit" data-key="' + sec.key + '" style="color:#fff;border-color:rgba(255,255,255,.4)">Editar</button>' +
           '</div>' +
         '</div>';
     } else if (v && v.video_url_desktop) {
       preview =
         '<div class="vc-preview">' +
           '<video src="' + esc(v.video_url_desktop) + '" muted playsinline preload="metadata"></video>' +
-          '<span class="vc-badge">Upload</span>' +
-          '<span class="vc-status' + (v.is_active == 1 ? '' : ' vc-status--off') + '"></span>' +
-          '<div class="vc-overlay">' +
-            '<button class="btn btn-outline btn-sm js-edit" data-key="' + sec.key + '" style="color:#fff;border-color:rgba(255,255,255,.5)">Editar</button>' +
+          '<span class="vc-badge vc-badge--upload">Upload</span>' +
+          statusPill(v.is_active) +
+          '<div class="vc-hover">' +
+            '<button class="btn btn-outline btn-sm js-edit" data-key="' + sec.key + '" style="color:#fff;border-color:rgba(255,255,255,.4)">Editar</button>' +
           '</div>' +
         '</div>';
-    } else if (hasFallback && sec.fallback) {
+    } else if (noRecord && sec.fallback) {
       preview =
         '<div class="vc-preview">' +
           '<video src="' + sec.fallback + '" muted playsinline preload="metadata"></video>' +
-          '<span class="vc-badge vc-badge--fallback">Atual (HTML)</span>' +
-          '<div class="vc-preview-empty" style="position:absolute;inset:0;background:rgba(0,0,0,.45);cursor:pointer;" onclick="document.querySelector(\'[data-key=\\'' + sec.key + '\\'].js-edit\').click()"></div>' +
+          '<span class="vc-badge vc-badge--html">Padrao HTML</span>' +
+          '<div class="vc-hover">' +
+            '<button class="btn btn-outline btn-sm js-edit" data-key="' + sec.key + '" style="color:#fff;border-color:rgba(255,255,255,.4)">+ Gerenciar</button>' +
+          '</div>' +
         '</div>';
     } else {
       preview =
         '<div class="vc-preview">' +
-          '<div class="vc-preview-empty js-edit" data-key="' + sec.key + '" style="cursor:pointer;">' +
+          '<div class="vc-empty" data-key="' + sec.key + '">' +
             '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><path d="M12 8v8m-4-4h8"/></svg>' +
-            '<span>Clique para adicionar</span>' +
+            '<span>Adicionar video</span>' +
           '</div>' +
         '</div>';
     }
 
-    /* ── info ── */
+    /* info text */
     var info = '';
     if (v && v.type === 'youtube') {
       info = 'youtu.be/' + esc(v.youtube_video_id);
     } else if (v && v.video_file_desktop) {
       info = esc(v.video_file_desktop.split('/').pop());
+    } else if (noRecord) {
+      info = 'Video padrao (definido no HTML)';
     } else {
-      info = hasFallback ? 'Não gerenciado pelo admin (usando HTML)' : 'Sem vídeo configurado';
+      info = 'Sem video configurado';
     }
 
-    /* ── actions ── */
+    /* actions */
     var actions = '';
     if (v) {
       var togLabel = v.is_active == 1 ? 'Desativar' : 'Ativar';
@@ -202,11 +247,11 @@
         '<button class="btn ' + togClass + ' btn-sm js-toggle" data-id="' + v.id + '">' + togLabel + '</button>' +
         '<button class="btn btn-danger btn-sm js-remove" data-key="' + sec.key + '">Remover</button>';
     } else {
-      actions = '<button class="btn btn-black btn-sm js-edit" data-key="' + sec.key + '">+ Configurar vídeo</button>';
+      actions = '<button class="btn btn-primary btn-sm js-edit" data-key="' + sec.key + '">+ Configurar video</button>';
     }
 
     return (
-      '<div class="video-card' + (!v ? ' video-card--empty' : '') + '">' +
+      '<div class="video-card' + (noRecord ? ' video-card--empty' : '') + '">' +
         preview +
         '<div class="vc-body">' +
           '<p class="vc-page">' + esc(sec.page) + '</p>' +
@@ -218,140 +263,139 @@
     );
   }
 
-  /* ── Editor modal ─────────────────────────────────── */
+  /* ── Editor Modal ─────────────────────────────────────────── */
   function openEditor(sectionKey) {
-    var sec = SECTIONS.find(function (s) { return s.key === sectionKey; });
-    var v   = videoData[sectionKey] || null;
+    var sec  = SECTIONS.find(function (s) { return s.key === sectionKey; });
+    var v    = videoData[sectionKey] || null;
     var isYt = v && v.type === 'youtube';
     var ytVal = v && v.youtube_video_id ? 'https://www.youtube.com/watch?v=' + v.youtube_video_id : '';
 
     var html =
       '<div class="type-toggle">' +
-        '<input type="radio" name="sfvtype" id="sfvt_up" value="upload" ' + (!isYt ? 'checked' : '') + ' />' +
-        '<label for="sfvt_up">📁 Arquivo</label>' +
-        '<input type="radio" name="sfvtype" id="sfvt_yt" value="youtube" ' + (isYt ? 'checked' : '') + ' />' +
-        '<label for="sfvt_yt">▶ YouTube</label>' +
+        '<input type="radio" name="sfvtype" id="sfvt_up" value="upload" ' + (!isYt ? 'checked' : '') + '/>' +
+        '<label for="sfvt_up">Arquivo</label>' +
+        '<input type="radio" name="sfvtype" id="sfvt_yt" value="youtube" ' + (isYt ? 'checked' : '') + '/>' +
+        '<label for="sfvt_yt">YouTube</label>' +
       '</div>' +
-
       '<div id="sfUploadSec"' + (isYt ? ' style="display:none"' : '') + '>' +
         (v && v.video_url_desktop
-          ? '<div class="current-preview"><video src="' + esc(v.video_url_desktop) + '" muted controls></video><p>Vídeo atual</p></div>'
+          ? '<div class="current-preview"><video src="' + esc(v.video_url_desktop) + '" muted controls></video><p>Video atual</p></div>'
           : '') +
-        '<div class="field"><label>Arquivo de vídeo (.mp4 / .webm)</label>' +
+        '<div class="field"><label>Arquivo de video (.mp4 / .webm)</label>' +
           '<div class="upload-zone" id="sfDropZone">' +
             '<input type="file" id="sfVideoFile" accept="video/mp4,video/webm" />' +
-            '<div class="upload-zone__icon">📹</div>' +
+            '<div class="upload-zone__icon">&#x1F4F9;</div>' +
             '<p class="upload-zone__text"><strong>Clique</strong> ou arraste o arquivo aqui</p>' +
             '<p id="sfDropName" class="upload-zone__name"></p>' +
           '</div>' +
         '</div>' +
       '</div>' +
-
       '<div id="sfYtSec"' + (!isYt ? ' style="display:none"' : '') + '>' +
         '<div class="field"><label>URL do YouTube</label>' +
           '<input type="text" id="sfYtUrl" value="' + esc(ytVal) + '" placeholder="https://www.youtube.com/watch?v=..." />' +
-          '<p class="field-hint">Cole qualquer formato: watch?v=, youtu.be/ ou embed/</p>' +
+          '<p class="field-hint">Aceita qualquer formato: watch?v=, youtu.be/, embed/</p>' +
         '</div>' +
         '<div class="yt-info">Embed gerado automaticamente com autoplay, mute e loop infinito.</div>' +
       '</div>' +
-
-      '<div class="field" style="margin-top:14px;">' +
-        '<label style="cursor:pointer;display:flex;align-items:center;gap:8px;text-transform:none;letter-spacing:0;font-size:13px;font-weight:500;">' +
-          '<input type="checkbox" id="sfIsActive" ' + (v ? (v.is_active == 1 ? 'checked' : '') : 'checked') + ' /> Ativo (visível no site)' +
+      '<div class="field" style="margin-top:14px">' +
+        '<label style="cursor:pointer;display:flex;align-items:center;gap:8px;text-transform:none;letter-spacing:0;font-size:13px;font-weight:500">' +
+          '<input type="checkbox" id="sfIsActive" ' + (v ? (v.is_active == 1 ? 'checked' : '') : 'checked') + ' /> Ativo (visivel no site)' +
         '</label>' +
       '</div>' +
-
       '<div class="modal-footer">' +
-        '<button class="btn btn-outline" id="sfCancelBtn">Cancelar</button>' +
-        '<button class="btn btn-black" id="sfSaveBtn">Salvar</button>' +
+        '<button class="btn btn-outline btn-sm" id="sfCancelBtn">Cancelar</button>' +
+        '<button class="btn btn-primary btn-sm" id="sfSaveBtn">Salvar alteracoes</button>' +
       '</div>';
 
-    Modal.open((sec ? sec.label : sectionKey), html);
+    Modal.open(sec ? sec.label : sectionKey, html);
 
     /* type toggle */
-    $$('[name="sfvtype"]').forEach(function (r) {
+    qq('[name="sfvtype"]').forEach(function (r) {
       r.addEventListener('change', function () {
         var isY = this.value === 'youtube';
-        $('#sfUploadSec').style.display = isY ? 'none' : 'block';
-        $('#sfYtSec').style.display     = isY ? 'block' : 'none';
+        q('#sfUploadSec').style.display = isY ? 'none' : 'block';
+        q('#sfYtSec').style.display     = isY ? 'block' : 'none';
       });
     });
 
     /* drop zone */
-    var zone  = $('#sfDropZone');
-    var fInput = $('#sfVideoFile');
-    zone.addEventListener('click', function () { fInput.click(); });
+    var zone  = q('#sfDropZone');
+    var fInput = q('#sfVideoFile');
+    zone.addEventListener('click',     function ()  { fInput.click(); });
     zone.addEventListener('dragover',  function (e) { e.preventDefault(); zone.classList.add('upload-zone--drag'); });
     zone.addEventListener('dragleave', function ()  { zone.classList.remove('upload-zone--drag'); });
     zone.addEventListener('drop', function (e) {
       e.preventDefault(); zone.classList.remove('upload-zone--drag');
       if (e.dataTransfer.files.length) {
-        try { var dt = new DataTransfer(); dt.items.add(e.dataTransfer.files[0]); fInput.files = dt.files; } catch(x) {}
-        $('#sfDropName').textContent = e.dataTransfer.files[0].name;
+        try { var dt = new DataTransfer(); dt.items.add(e.dataTransfer.files[0]); fInput.files = dt.files; } catch (x) {}
+        q('#sfDropName').textContent = e.dataTransfer.files[0].name;
       }
     });
     fInput.addEventListener('change', function () {
-      if (this.files.length) $('#sfDropName').textContent = this.files[0].name;
+      if (this.files.length) q('#sfDropName').textContent = this.files[0].name;
     });
 
-    $('#sfCancelBtn').addEventListener('click', Modal.close);
-    $('#sfSaveBtn').addEventListener('click', function () { saveVideo(sectionKey, v); });
+    q('#sfCancelBtn').addEventListener('click', function () { Modal.close(); });
+    q('#sfSaveBtn').addEventListener('click',   function () { saveVideo(sectionKey, v); });
   }
 
   function saveVideo(sectionKey, existing) {
     var sec    = SECTIONS.find(function (s) { return s.key === sectionKey; });
     var type   = (document.querySelector('[name="sfvtype"]:checked') || {}).value || 'upload';
-    var active = ($('#sfIsActive') || {}).checked ? 1 : 0;
-
+    var active = (q('#sfIsActive') || {}).checked ? 1 : 0;
     var fd = new FormData();
     fd.append('type',        type);
-    fd.append('title',       (sec ? sec.label : sectionKey));
+    fd.append('title',       sec ? sec.label : sectionKey);
     fd.append('section_key', sectionKey);
     fd.append('is_active',   active);
     fd.append('sort_order',  0);
 
     if (type === 'youtube') {
-      var ytUrl = (($('#sfYtUrl') || {}).value || '').trim();
-      if (!ytUrl) { toast('URL do YouTube é obrigatória', 'error'); return; }
+      var ytUrl = ((q('#sfYtUrl') || {}).value || '').trim();
+      if (!ytUrl) { toast('URL do YouTube e obrigatoria', 'error'); return; }
       fd.append('youtube_url', ytUrl);
     } else {
-      var fi = $('#sfVideoFile');
+      var fi = q('#sfVideoFile');
       if (fi && fi.files.length) {
         fd.append('video_desktop', fi.files[0]);
       } else if (!existing) {
-        toast('Selecione um arquivo de vídeo', 'error'); return;
+        toast('Selecione um arquivo de video', 'error'); return;
       }
     }
 
-    var saveBtn = $('#sfSaveBtn');
+    var saveBtn = q('#sfSaveBtn');
+    var resetBtn = function () {
+      if (saveBtn) { saveBtn.disabled = false; saveBtn.textContent = 'Salvar alteracoes'; }
+    };
     if (saveBtn) { saveBtn.disabled = true; saveBtn.textContent = 'Salvando...'; }
 
     var url = existing ? '/videos/' + existing.id + '/update' : '/videos';
     api('POST', url, fd)
       .then(function (res) {
         if (res.success) { toast('Salvo com sucesso!'); Modal.close(); loadVideos(); }
-        else toast(res.message || 'Erro ao salvar', 'error');
+        else             { toast(res.message || 'Erro ao salvar', 'error'); resetBtn(); }
       })
-      .catch(function (e) { toast('Erro: ' + (e.message || ''), 'error'); })
-      .then(function () {
-        var b = $('#sfSaveBtn');
-        if (b) { b.disabled = false; b.textContent = 'Salvar'; }
+      .catch(function (e) {
+        toast('Erro: ' + (e.message || 'inesperado'), 'error'); resetBtn();
       });
   }
 
   function removeVideo(sectionKey) {
     var v = videoData[sectionKey];
     if (!v) return;
-    sfConfirm('Remover vídeo?', 'O registro será removido. O arquivo no servidor será mantido.').then(function (ok) {
+    sfConfirm('Remover video?', 'O registro sera removido do banco de dados. O arquivo no servidor sera mantido.').then(function (ok) {
       if (!ok) return;
-      api('DELETE', '/videos/' + v.id).then(function () { toast('Removido'); loadVideos(); });
+      api('DELETE', '/videos/' + v.id).then(function (res) {
+        toast(res.success !== false ? 'Video removido' : (res.message || 'Erro ao remover'), res.success !== false ? '' : 'error');
+        loadVideos();
+      });
     });
   }
 
   function toggleVideo(id) {
     api('PUT', '/videos/' + id + '/toggle').then(function (res) {
       if (res.success) {
-        toast(res.data && res.data.is_active ? 'Ativado' : 'Desativado');
+        toast(res.data && res.data.is_active ? 'Video ativado' : 'Video desativado');
         loadVideos();
       }
     });
@@ -362,41 +406,57 @@
      ============================================================ */
   document.addEventListener('DOMContentLoaded', function () {
     Auth.init();
-
     if (Auth.isLoggedIn()) { showApp(); loadVideos(); }
     else showLogin();
 
     /* Login */
-    $('#loginForm').addEventListener('submit', function (e) {
+    q('#loginForm').addEventListener('submit', function (e) {
       e.preventDefault();
-      var errEl = $('#loginError');
+      var errEl   = q('#loginError');
+      var spinner = q('#loginSpinner');
+      var btnText = q('#loginBtnText');
+      var loginBtn = q('#loginBtn');
       errEl.style.display = 'none';
+      loginBtn.disabled = true;
+      if (spinner) spinner.style.display = 'inline-block';
+      if (btnText) btnText.style.display = 'none';
+
       api('POST', '/auth/login', {
-        username: $('#loginUser').value,
-        password: $('#loginPass').value
+        username: q('#loginUser').value.trim(),
+        password: q('#loginPass').value
       }).then(function (res) {
         if (res.data && res.data.token) {
-          Auth.login(res.data.token, res.data.user || { username: $('#loginUser').value });
+          Auth.login(res.data.token, res.data.user || { username: q('#loginUser').value });
           showApp(); loadVideos();
         } else {
-          errEl.textContent = res.message || 'Credenciais inválidas';
+          errEl.textContent  = res.message || 'Credenciais invalidas';
           errEl.style.display = 'block';
+          loginBtn.disabled   = false;
+          if (spinner) spinner.style.display = 'none';
+          if (btnText) btnText.style.display  = 'inline';
         }
       }).catch(function () {
-        errEl.textContent = 'Erro de conexão';
+        errEl.textContent  = 'Erro de conexao. Tente novamente.';
         errEl.style.display = 'block';
+        loginBtn.disabled   = false;
+        if (spinner) spinner.style.display = 'none';
+        if (btnText) btnText.style.display  = 'inline';
       });
     });
 
     /* Logout */
-    $('#logoutBtn').addEventListener('click', function () { Auth.logout(); showLogin(); });
+    q('#logoutBtn').addEventListener('click', function () { Auth.logout(); showLogin(); });
 
     /* Refresh */
-    $('#refreshBtn').addEventListener('click', loadVideos);
+    q('#refreshBtn').addEventListener('click', loadVideos);
 
-    /* Modal */
-    $('#modalClose').addEventListener('click', Modal.close);
-    $('#modalOverlay').addEventListener('click', function (e) { if (e.target === this) Modal.close(); });
+    /* Modal close */
+    q('#modalClose').addEventListener('click', function () { Modal.close(); });
+    q('#modalOverlay').addEventListener('click', function (e) { if (e.target === this) Modal.close(); });
+
+    /* Mobile sidebar */
+    if (q('#menuToggle'))       q('#menuToggle').addEventListener('click', openSidebar);
+    if (q('#sidebarBackdrop'))  q('#sidebarBackdrop').addEventListener('click', closeSidebar);
   });
 
 })();
