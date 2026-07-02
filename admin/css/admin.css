@@ -146,6 +146,7 @@ img,video { display:block }
 .menu-toggle:hover { background:var(--border);color:var(--text) }
 .mh-info { flex:1 }
 .mh-title { font-size:30px;font-weight:700;letter-spacing:-.8px;color:var(--text);margin-bottom:2px; line-height:1 }
+.mh-title #appVersionLabel { color:#60722E; }
 .mh-desc { font-size:12px;color:var(--muted) }
 .mh-actions { display:flex; align-items:center; gap:10px; }
 .main-content { padding:16px 22px 22px;flex:1 }

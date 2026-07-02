@@ -4,6 +4,7 @@
 (function () {
   'use strict';
 
+  var APP_VERSION = '1.0.1';
   var API = '/api';
 
   var SECTIONS = [
@@ -117,7 +118,7 @@
     q('#appLayout').style.display   = 'flex';
     var user = Auth.user;
     if (user && q('#sidebarUser')) q('#sidebarUser').textContent = user.username || '';
-    if (q('#welcomeUser')) q('#welcomeUser').textContent = (user && user.username) ? user.username : 'Admin';
+    if (q('#appVersionLabel')) q('#appVersionLabel').textContent = APP_VERSION;
   }
 
   /* ── Mobile Sidebar ───────────────────────────────────────── */
@@ -144,8 +145,12 @@
     return api('GET', '/videos/library').then(function (res) {
       libraryCache = (res && res.data) ? res.data : [];
       return libraryCache;
-    }).catch(function () {
+    }).catch(function (err) {
       libraryCache = [];
+      if (q('#libraryUploadInfo')) {
+        q('#libraryUploadInfo').textContent = 'Não foi possível carregar a biblioteca.';
+      }
+      toast('Erro ao carregar biblioteca: ' + (err && err.message ? err.message : 'falha desconhecida'), 'error');
       return [];
     });
   }
@@ -156,6 +161,11 @@
     if (q('#libraryView')) q('#libraryView').style.display = currentView === 'library' ? 'grid' : 'none';
     if (q('#navVideos')) q('#navVideos').classList.toggle('is-active', currentView === 'videos');
     if (q('#navLibrary')) q('#navLibrary').classList.toggle('is-active', currentView === 'library');
+
+    var targetHash = currentView === 'library' ? '#biblioteca' : '#videos';
+    if (window.location.hash !== targetHash) {
+      history.replaceState(null, '', targetHash);
+    }
   }
 
   function renderLibraryPage() {
@@ -645,6 +655,16 @@
         loadLibraryPage();
       });
     }
+
+    window.addEventListener('hashchange', function () {
+      var hashRoute = (window.location.hash || '').replace('#', '').toLowerCase();
+      if (hashRoute === 'biblioteca' || hashRoute === 'library') {
+        switchView('library');
+        loadLibraryPage();
+      } else {
+        switchView('videos');
+      }
+    });
 
     if (q('#libraryRefreshBtn')) {
       q('#libraryRefreshBtn').addEventListener('click', function () {
