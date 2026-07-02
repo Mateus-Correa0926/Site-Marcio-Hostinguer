@@ -328,6 +328,18 @@
     var containers = document.querySelectorAll('[data-video-section]');
     if (!containers.length) return;
 
+    function withCacheBuster(url, seed) {
+      if (!url) return url;
+      var buster = seed ? String(seed) : String(Date.now());
+      return url + (url.indexOf('?') >= 0 ? '&' : '?') + 'v=' + encodeURIComponent(buster);
+    }
+
+    function extractVideoPayload(data) {
+      if (!data) return null;
+      if (Array.isArray(data)) return data.length ? data[0] : null;
+      return data;
+    }
+
     function applyVideo(container, data) {
       if (!data) return;
       var vid = container.querySelector('video');
@@ -346,8 +358,9 @@
         }
       } else if (data.type === 'upload' && data.video_url_desktop) {
         /* Update existing video src */
-        if (vid && vid.getAttribute('src') !== data.video_url_desktop) {
-          vid.src = data.video_url_desktop;
+        var nextSrc = withCacheBuster(data.video_url_desktop, data.updated_at || data.id || data.video_file_desktop);
+        if (vid) {
+          vid.src = nextSrc;
           vid.load();
           var p = vid.play();
           if (p && typeof p.catch === 'function') p.catch(function () {});
@@ -355,20 +368,29 @@
       }
     }
 
-    /* Fetch each unique section in parallel */
-    var fetched = {};
+    /* Agrupa containers por seção, busca uma vez e aplica em todos */
+    var bySection = {};
     for (var ci = 0; ci < containers.length; ci++) {
-      (function (container) {
-        var key = container.getAttribute('data-video-section');
-        if (!key || fetched[key]) return;
-        fetched[key] = true;
-        fetch('/api/videos/section/' + encodeURIComponent(key))
+      var key = containers[ci].getAttribute('data-video-section');
+      if (!key) continue;
+      if (!bySection[key]) bySection[key] = [];
+      bySection[key].push(containers[ci]);
+    }
+
+    var keys = Object.keys(bySection);
+    for (var ki = 0; ki < keys.length; ki++) {
+      (function (key) {
+        fetch('/api/videos/section/' + encodeURIComponent(key), { cache: 'no-store' })
           .then(function (r) { return r.ok ? r.json() : null; })
           .then(function (res) {
-            if (res && res.success && res.data) applyVideo(container, res.data);
+            var payload = res && res.success ? extractVideoPayload(res.data) : null;
+            if (!payload) return;
+            for (var ai = 0; ai < bySection[key].length; ai++) {
+              applyVideo(bySection[key][ai], payload);
+            }
           })
           .catch(function () { /* keep hardcoded src */ });
-      })(containers[ci]);
+      })(keys[ki]);
     }
   })();
 

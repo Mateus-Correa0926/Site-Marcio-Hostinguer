@@ -136,6 +136,7 @@
      VIDEO MANAGER
      ============================================================ */
   var videoData = {};
+    var pageFilter = 'all';
 
   function loadVideos() {
     q('#videoGrid').innerHTML =
@@ -147,6 +148,7 @@
       .then(function (res) {
         videoData = {};
         (res.data || []).forEach(function (v) { videoData[v.section_key] = v; });
+        renderPageTabs();
         updateCounters();
         renderGrid();
       })
@@ -159,11 +161,46 @@
   function updateCounters() {
     var configured = Object.keys(videoData).length;
     if (q('#videoBadge')) q('#videoBadge').textContent = String(configured);
-    if (q('#videoCountInfo')) q('#videoCountInfo').textContent = configured + ' espaços configurados';
+    if (q('#videoCountInfo')) {
+      var visible = getVisibleSections().length;
+      q('#videoCountInfo').textContent = visible + ' de ' + SECTIONS.length + ' espaços exibidos';
+    }
+  }
+
+  function getVisibleSections() {
+    if (pageFilter === 'all') return SECTIONS.slice();
+    return SECTIONS.filter(function (sec) { return sec.page === pageFilter; });
+  }
+
+  function renderPageTabs() {
+    var tabsRoot = q('#videoPageTabs');
+    if (!tabsRoot) return;
+
+    var pages = [];
+    for (var i = 0; i < SECTIONS.length; i++) {
+      if (pages.indexOf(SECTIONS[i].page) === -1) pages.push(SECTIONS[i].page);
+    }
+
+    var html = '<button class="ct-tab' + (pageFilter === 'all' ? ' is-active' : '') + '" type="button" data-page="all">Todas as páginas</button>';
+    for (var p = 0; p < pages.length; p++) {
+      var active = pageFilter === pages[p] ? ' is-active' : '';
+      html += '<button class="ct-tab' + active + '" type="button" data-page="' + esc(pages[p]) + '">' + esc(pages[p]) + '</button>';
+    }
+
+    tabsRoot.innerHTML = html;
+    qq('.ct-tab', tabsRoot).forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        pageFilter = this.dataset.page || 'all';
+        renderPageTabs();
+        updateCounters();
+        renderGrid();
+      });
+    });
   }
 
   function renderGrid() {
-    q('#videoGrid').innerHTML = SECTIONS.map(renderCard).join('');
+    var visibleSections = getVisibleSections();
+    q('#videoGrid').innerHTML = visibleSections.map(renderCard).join('');
     qq('.js-edit').forEach(function (b) {
       b.addEventListener('click', function () { openEditor(this.dataset.key); });
     });
@@ -176,6 +213,10 @@
     qq('.vc-empty[data-key]').forEach(function (el) {
       el.addEventListener('click', function () { openEditor(this.dataset.key); });
     });
+
+    if (!visibleSections.length) {
+      q('#videoGrid').innerHTML = '<div class="grid-loading"><p>Nenhuma seção encontrada para esse filtro.</p></div>';
+    }
   }
 
   function statusPill(isActive) {
