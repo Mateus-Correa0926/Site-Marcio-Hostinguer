@@ -117,6 +117,7 @@
     q('#appLayout').style.display   = 'flex';
     var user = Auth.user;
     if (user && q('#sidebarUser')) q('#sidebarUser').textContent = user.username || '';
+    if (q('#welcomeUser')) q('#welcomeUser').textContent = (user && user.username) ? user.username : 'Admin';
   }
 
   /* ── Mobile Sidebar ───────────────────────────────────────── */
@@ -146,12 +147,19 @@
       .then(function (res) {
         videoData = {};
         (res.data || []).forEach(function (v) { videoData[v.section_key] = v; });
+        updateCounters();
         renderGrid();
       })
       .catch(function () {
         q('#videoGrid').innerHTML =
           '<div class="grid-loading"><p style="color:var(--red)">Erro ao carregar. Verifique a conexao com a API.</p></div>';
       });
+  }
+
+  function updateCounters() {
+    var configured = Object.keys(videoData).length;
+    if (q('#videoBadge')) q('#videoBadge').textContent = String(configured);
+    if (q('#videoCountInfo')) q('#videoCountInfo').textContent = configured + ' espaços configurados';
   }
 
   function renderGrid() {
@@ -449,6 +457,14 @@
 
     /* Refresh */
     q('#refreshBtn').addEventListener('click', loadVideos);
+
+    /* Quick add */
+    if (q('#addVideoBtn')) {
+      q('#addVideoBtn').addEventListener('click', function () {
+        var firstEmpty = SECTIONS.find(function (sec) { return !videoData[sec.key]; });
+        openEditor((firstEmpty || SECTIONS[0]).key);
+      });
+    }
 
     /* Modal close */
     q('#modalClose').addEventListener('click', function () { Modal.close(); });
